@@ -14,18 +14,23 @@ const fadeIn = (x = 0, y = 0, delay = 0) => ({
 
 const About = () => {
   return (
-    <div className="border-b border-neutral-900 pb-24 px-4">
+    <section
+      id="about"
+      className="border-b border-neutral-900 px-4 pb-32 pt-28"
+    >
+      {/* Gradient Title */}
       <motion.h2
         variants={fadeIn(0, -40)}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="my-20 text-center text-4xl font-bold"
+        className="my-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
-        About <span className="text-neutral-500">Me</span>
+        About Me
       </motion.h2>
 
-      <div className="mx-auto flex max-w-6xl flex-col lg:flex-row items-center gap-12 bg-neutral-900/30 rounded-2xl p-8 shadow-md backdrop-blur-md">
+      {/* Content Container */}
+      <div className="mx-auto flex max-w-6xl flex-col lg:flex-row items-center gap-12 bg-neutral-900/40 p-8 rounded-2xl shadow-md transition-all duration-300">
         {/* Image Section */}
         <motion.div
           variants={fadeIn(-60, 0, 0.2)}
@@ -41,7 +46,7 @@ const About = () => {
               className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <a
-              href="https://linktr.ee/zohaib_cheema" // Replace with actual Linktree link
+              href="https://linktr.ee/zohaib_cheema"
               target="_blank"
               rel="noopener noreferrer"
               className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-lg font-semibold"
@@ -64,7 +69,7 @@ const About = () => {
           </p>
         </motion.div>
       </div>
-    </div>
+    </section>
   );
 };
 

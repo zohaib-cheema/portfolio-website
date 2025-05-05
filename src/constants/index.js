@@ -1,6 +1,10 @@
 import project1 from "../assets/projects/project-1.jpg";
 import project2 from "../assets/projects/project-2.jpg";
 import project3 from "../assets/projects/project-3.jpg";
+import uberLogo from "../assets/uber.png";
+import sbdcLogo from "../assets/SBDC.jpeg";
+import idtechLogo from "../assets/idtech.png";
+import bucknellLogo from "../assets/Bucknell.png";
 
 export const HERO_CONTENT = `I am a passionate full stack developer with a knack for crafting robust and scalable web applications. With 5 years of hands-on experience, I have honed my skills in front-end technologies like React and Next.js, as well as back-end technologies like Node.js, MySQL, PostgreSQL, and MongoDB. My goal is to leverage my expertise to create innovative solutions that drive business growth and deliver exceptional user experiences.`;
 
@@ -11,6 +15,7 @@ export const EXPERIENCES = [
     year: "Sep 2023 – Present",
     role: "Software Engineering Instructor",
     company: "iD Tech",
+    logo: idtechLogo,
     description: `Spearheaded instruction for 70+ students in Python, Java, ML, and AI development using TensorFlow and OpenAI. Built project-based modules that improved debugging efficiency by 34% and raised proficiency and satisfaction scores.`,
     technologies: ["Python", "Java", "TensorFlow", "OpenAI", "ML", "AI"],
   },
@@ -18,13 +23,16 @@ export const EXPERIENCES = [
     year: "May 2024 – Aug 2024",
     role: "Software Engineer Intern",
     company: "Uber",
-    description: `Developed a Go/TypeScript project converting 10M users to Uber One across 9 countries with A/B testing and UI/UX improvements. Enhanced UberEats merchant tools using Apache Pinot and Hive, and built a Go API for promotion code validation using SQL and Kafka.`,
-    technologies: ["Go", "TypeScript", "A/B Testing", "UI/UX", "SQL", "Kafka", "Hive", "Apache Pinot"],
+    logo: uberLogo,
+    description:
+      "Worked on ride optimization systems using microservices and API integrations.",
+    technologies: ["Node.js", "TypeScript", "Redis", "Kubernetes"],
   },
   {
     year: "Aug 2023 – Apr 2024",
     role: "Full-Stack Software Engineer Intern",
     company: "Bucknell L&IT Services",
+    logo: bucknellLogo,
     description: `Built and launched a full-stack library web app using React, Node, Tailwind CSS, and Firebase for 4000+ users. Designed a PostgreSQL database with REST APIs to manage inventory and user data, reducing manual tasks by 40%.`,
     technologies: ["React", "Node", "Tailwind CSS", "Firebase", "PostgreSQL", "REST APIs"],
   },
@@ -32,6 +40,7 @@ export const EXPERIENCES = [
     year: "May 2023 – Aug 2023",
     role: "App Development Intern",
     company: "PA Small Business Development Center",
+    logo: sbdcLogo,
     description: `Created an iOS app for a local bakery using Swift and Figma, streamlining order flow and reducing wait times by 35%. Integrated MongoDB to manage orders and inventory, saving 10+ hours of manual tracking weekly.`,
     technologies: ["iOS", "Swift", "Figma", "MongoDB"],
   },
@@ -43,23 +52,21 @@ export const PROJECTS = [
     title: "AwareNest",
     image: project1,
     description:
-      "Created a mental health app with Dart and MySQL, letting users log moods, access content, and track emotional trends. Integrated a C++ backend for offline emotion analysis, enhancing response time and personalized recommendations.",
-    technologies: ["Dart", "MySQL", "C++"],
+      "AwareNest is a mental health app designed to help users track their emotional well-being, log moods, and access mindfulness content. The app uses personalized emotion analysis to provide targeted suggestions and improve mental health tracking over time.",    technologies: ["Dart", "MySQL", "C++"],
     link: "https://github.com/yourusername/awarenest",
   },
   {
     title: "PayPie",
     image: project2,
     description:
-      "Built a full-stack expense splitter with React, Next.js, Firebase, and AWS Lambda for receipt parsing and cost splits. Used Gemini Gen AI for automated expense summary and Git for efficient version control and team collaboration.",
-    technologies: ["React", "Next.js", "Firebase", "AWS Lambda", "Gemini Gen AI"],
+      "PayPie is a web app designed to simplify expense splitting for groups, whether for travel, shared living, or collaborative projects. With features like smart cost splitting, real-time updates, and receipt scanning, PayPie streamlines the process of managing and settling group finances.",    technologies: ["React", "Next.js", "Firebase", "AWS Lambda", "Gemini Gen AI"],
     link: "https://github.com/yourusername/paypie",
   },
   {
     title: "DeFacto",
     image: project3,
     description:
-      "Built a hybrid fake news classifier using Scikit-learn, TensorFlow, and Keras to analyze social and political content. Preprocessed data and engineered features with R, Pandas, and NumPy, enhancing model accuracy and reliability.",
+      "DeFacto is a machine learning-based tool that classifies fake news articles using a hybrid model built with Scikit-learn, TensorFlow, and Keras. The system analyzes social and political content to detect deception in news stories and social media posts, providing a reliable solution to address the growing issue of misinformation.",
     technologies: ["Scikit-learn", "TensorFlow", "Keras", "R", "Pandas", "NumPy"],
     link: "https://github.com/yourusername/defacto",
   },

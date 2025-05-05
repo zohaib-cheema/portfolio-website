@@ -29,29 +29,37 @@ const LEADERSHIP = [
 
 const Leadership = () => {
   return (
-    <div className="border-b border-neutral-900 pb-4">
+    <section
+      id="leadership"
+      className="border-b border-neutral-900 pb-24 px-4 pt-28"
+    >
+      {/* Gradient Title */}
       <motion.h2
         whileInView={{ opacity: 1, y: 0 }}
         initial={{ opacity: 0, y: -100 }}
         transition={{ duration: 0.5 }}
-        className="my-20 text-center text-4xl font-bold"
+        className="my-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
-        Leadership <span className="text-neutral-500">Experience</span>
+        Leadership Experience
       </motion.h2>
-      <div className="space-y-10">
+
+      <div className="flex flex-col items-center space-y-10">
         {LEADERSHIP.map((item, index) => (
           <motion.div
             key={index}
             whileInView={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="rounded-xl bg-neutral-900/60 p-6 shadow-md hover:shadow-purple-800/30 transition duration-300 ease-in-out"
+            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-md hover:shadow-purple-800 transition-shadow duration-300"
           >
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
               <h3 className="text-xl font-semibold text-white">
-                {item.org} <span className="text-purple-400 font-medium">- {item.role}</span>
+                {item.org}{" "}
+                <span className="text-purple-300 font-normal">— {item.role}</span>
               </h3>
-              <span className="text-sm text-neutral-400 mt-2 md:mt-0">{item.duration}</span>
+              <span className="text-sm text-neutral-400 mt-2 md:mt-0">
+                {item.duration}
+              </span>
             </div>
             <p className="italic text-sm text-neutral-400 mb-2">{item.location}</p>
             <p className="text-neutral-300 text-base leading-relaxed">
@@ -60,7 +68,7 @@ const Leadership = () => {
           </motion.div>
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 

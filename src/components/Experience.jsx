@@ -1,17 +1,31 @@
+import { useState } from "react";
 import { EXPERIENCES } from "../constants";
 import { motion } from "framer-motion";
 
 const Experience = () => {
+  const [activeExp, setActiveExp] = useState(null);
+
+  const openModal = (experience) => {
+    setActiveExp(experience);
+  };
+
+  const closeModal = () => {
+    setActiveExp(null);
+  };
+
   return (
-    <div className="border-b border-neutral-900 pb-4 px-4">
+    <section
+      id="experience"
+      className="border-b border-neutral-900 pb-24 px-4 pt-28"
+    >
       {/* Section Title */}
       <motion.h2
         whileInView={{ opacity: 1, y: 0 }}
         initial={{ opacity: 0, y: -50 }}
         transition={{ duration: 0.5 }}
-        className="my-20 text-center text-4xl font-bold"
+        className="my-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
-        Work <span className="text-neutral-500">Experience</span>
+        Work Experience
       </motion.h2>
 
       {/* Experience Cards */}
@@ -22,34 +36,60 @@ const Experience = () => {
             whileInView={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-md hover:shadow-purple-800 transition-shadow duration-300"
+            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-md hover:shadow-purple-800 transition-shadow duration-300 flex flex-col md:flex-row items-center gap-6"
           >
-            {/* Logo + Heading */}
-            <div className="flex items-center gap-4 mb-2">
-              {experience.logo && (
+            {/* Company Logo */}
+            {experience.logo && (
+              <div className="flex-shrink-0">
                 <img
                   src={experience.logo}
                   alt={`${experience.company} logo`}
-                  className="w-10 h-10 object-cover rounded-full"
+                  className="w-20 h-20 object-contain rounded-xl border border-neutral-800 bg-white p-2"
                 />
-              )}
-              <div>
-                <p className="text-sm text-neutral-400">{experience.year}</p>
-                <h3 className="text-xl font-semibold text-white">
-                  {experience.role}{" "}
-                  <span className="text-purple-300 font-normal">
-                    — {experience.company}
-                  </span>
-                </h3>
               </div>
+            )}
+
+            {/* Experience Content */}
+            <div className="flex-1">
+              <p className="text-sm text-neutral-400">{experience.year}</p>
+              <h3 className="text-xl font-semibold text-white">
+                {experience.role}{" "}
+                <span className="text-purple-300 font-normal">
+                  — {experience.company}
+                </span>
+              </h3>
+
+              {/* View Details Button */}
+              <button
+                onClick={() => openModal(experience)}
+                className="mt-4 px-5 py-2 rounded-full bg-gradient-to-r from-pink-400 via-slate-500 to-purple-500 text-white font-medium shadow-lg hover:scale-105 transition-transform duration-200"
+              >
+                View Details
+              </button>
             </div>
+          </motion.div>
+        ))}
+      </div>
 
-            {/* Description */}
-            <p className="text-neutral-300 mb-4">{experience.description}</p>
-
-            {/* Tech Stack */}
+      {/* Modal for Experience Details */}
+      {activeExp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="bg-neutral-900 p-6 rounded-lg max-w-lg w-full text-white relative">
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-4 text-xl text-neutral-500 hover:text-white"
+            >
+              ✕
+            </button>
+            <h3 className="text-2xl font-semibold mb-2">{activeExp.role}</h3>
+            <p className="text-sm text-purple-300 mb-4">
+              {activeExp.company} — {activeExp.year}
+            </p>
+            <p className="text-neutral-300 whitespace-pre-wrap mb-4">
+              {activeExp.description}
+            </p>
             <div className="flex flex-wrap gap-2">
-              {experience.technologies.map((tech, idx) => (
+              {activeExp.technologies.map((tech, idx) => (
                 <span
                   key={idx}
                   className="bg-purple-900/20 text-purple-300 px-3 py-1 rounded-full text-sm font-medium"
@@ -58,10 +98,10 @@ const Experience = () => {
                 </span>
               ))}
             </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };
 

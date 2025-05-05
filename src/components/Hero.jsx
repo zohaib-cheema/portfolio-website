@@ -11,14 +11,24 @@ const container = (delay) => ({
 });
 
 const Hero = () => {
+  const scrollToSection = () => {
+    const aboutSection = document.getElementById("about");
+    if (aboutSection) {
+      aboutSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="py-28 px-4 flex flex-col items-center text-center">
+    <section
+      id="hero"
+      className="pt-[280px] pb-[240px] px-4 flex flex-col items-center text-center"
+    >
       {/* Line 1 */}
       <motion.h2
         variants={container(0)}
         initial="hidden"
         animate="visible"
-        className="text-5xl md:text-7xl font-bold text-white"
+        className="text-6xl md:text-8xl font-bold text-white"
       >
         Hi there! I'm
       </motion.h2>
@@ -28,7 +38,7 @@ const Hero = () => {
         variants={container(0.3)}
         initial="hidden"
         animate="visible"
-        className="mt-4 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent text-7xl md:text-8xl font-semibold"
+        className="mt-4 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent text-8xl md:text-9xl font-semibold"
       >
         Zohaib Cheema
       </motion.h1>
@@ -38,7 +48,7 @@ const Hero = () => {
         variants={container(0.6)}
         initial="hidden"
         animate="visible"
-        className="mt-6 text-3xl md:text-5xl font-semibold"
+        className="mt-6 text-4xl md:text-6xl font-semibold"
       >
         <span className="bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
           <Typewriter
@@ -57,15 +67,15 @@ const Hero = () => {
         </span>
       </motion.div>
 
-      {/* Arrow in flow with spacing below */}
+      {/* Scroll Arrow */}
       <motion.button
         whileHover={{ scale: 1.1 }}
-        className="mt-32 text-white text-4xl animate-bounce"
-        onClick={() => {}}
+        className="mt-44 text-white text-4xl animate-bounce"
+        onClick={scrollToSection}
       >
         ↓
       </motion.button>
-    </div>
+    </section>
   );
 };
 

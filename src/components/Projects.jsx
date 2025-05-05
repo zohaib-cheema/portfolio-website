@@ -11,18 +11,20 @@ const fadeIn = (delay = 0) => ({
 });
 
 const Projects = () => {
-  // Show only the first 3 projects
   const displayedProjects = PROJECTS.slice(0, 3);
 
   return (
-    <div className="border-b border-neutral-900 pb-24 px-4">
-      {/* Heading */}
+    <section
+      id="projects"
+      className="border-b border-neutral-900 pb-24 px-4 pt-28"
+    >
+      {/* Gradient Title */}
       <motion.h2
         variants={fadeIn(0)}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="my-20 text-center text-4xl font-bold"
+        className="my-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         Projects
       </motion.h2>
@@ -36,7 +38,7 @@ const Projects = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="w-full max-w-sm rounded-xl bg-neutral-900/40 backdrop-blur-md p-5 shadow-md hover:shadow-purple-800 transition-shadow duration-300"
+            className="w-full max-w-sm rounded-xl bg-neutral-900/40 p-5 shadow-md hover:shadow-purple-800 transition-shadow duration-300"
           >
             {/* Project Image */}
             <div className="overflow-hidden rounded-lg mb-4">
@@ -75,15 +77,15 @@ const Projects = () => {
       {/* View All Projects Button */}
       <div className="mt-16 flex justify-center">
         <a
-          href="https://github.com/zohaib-cheema?tab=repositories" // <-- Replace with your GitHub URL
+          href="https://github.com/zohaib-cheema?tab=repositories"
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full bg-purple-700 px-6 py-3 text-white text-sm font-semibold hover:bg-purple-800 transition-colors duration-300 shadow-md"
+          className="rounded-full bg-gradient-to-r from-pink-400 via-slate-500 to-purple-500 px-6 py-3 text-white text-sm font-semibold shadow-lg hover:scale-105 transition-transform duration-200"
         >
           View All Projects →
         </a>
       </div>
-    </div>
+    </section>
   );
 };
 
