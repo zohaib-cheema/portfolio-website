@@ -49,18 +49,18 @@ export const EXPERIENCES = [
 
 export const PROJECTS = [
   {
-    title: "AwareNest",
-    image: project1,
-    description:
-      "AwareNest is a mental health app designed to help users track their emotional well-being, log moods, and access mindfulness content. The app uses personalized emotion analysis to provide targeted suggestions and improve mental health tracking over time.",    technologies: ["Dart", "MySQL", "C++"],
-    link: "https://github.com/yourusername/awarenest",
-  },
-  {
     title: "PayPie",
     image: project2,
     description:
       "PayPie is a web app designed to simplify expense splitting for groups, whether for travel, shared living, or collaborative projects. With features like smart cost splitting, real-time updates, and receipt scanning, PayPie streamlines the process of managing and settling group finances.",    technologies: ["React", "Next.js", "Firebase", "AWS Lambda", "Gemini Gen AI"],
     link: "https://github.com/yourusername/paypie",
+  },
+  {
+    title: "AwareNest",
+    image: project1,
+    description:
+      "AwareNest is a mental health app designed to help users track their emotional well-being, log moods, and access mindfulness content. The app uses personalized emotion analysis to provide targeted suggestions and improve mental health tracking over time.",    technologies: ["Dart", "MySQL", "C++"],
+    link: "https://github.com/yourusername/awarenest",
   },
   {
     title: "DeFacto",

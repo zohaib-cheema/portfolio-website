@@ -38,7 +38,7 @@ const Projects = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="w-full max-w-sm rounded-xl bg-neutral-900/40 p-5 shadow-md hover:shadow-purple-800 transition-shadow duration-300"
+            className="w-full max-w-sm rounded-xl bg-neutral-900/40 p-5 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
           >
             {/* Project Image */}
             <div className="overflow-hidden rounded-lg mb-4">

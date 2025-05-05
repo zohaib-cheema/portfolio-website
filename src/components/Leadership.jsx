@@ -7,7 +7,7 @@ const LEADERSHIP = [
     location: "Lewisburg, PA",
     duration: "Aug 2023 – Jun 2024",
     description:
-      "Launched and led the GDSC chapter at my college, guiding 90+ students through hands-on learning of emerging technologies. Worked closely with Google representatives to organize 6+ expert-led talks that shaped the club's long-term goals and technical direction."
+      "Launched and led the GDSC chapter at my college, guiding 90+ students through hands-on learning of emerging technologies. Worked closely with Google representatives to organize 6+ expert-led talks that shaped the club's long-term goals and technical direction.",
   },
   {
     org: "Bucknell Consulting Group",
@@ -15,7 +15,7 @@ const LEADERSHIP = [
     location: "Lewisburg, PA",
     duration: "Jan 2023 – Dec 2023",
     description:
-      "Directed 3 tech-consulting projects with student teams, delivering innovative, data-driven solutions for local businesses. Conducted over 10 workshops in collaboration with industry experts to strengthen member capabilities in IT strategy, analytics, and client communications."
+      "Directed 3 tech-consulting projects with student teams, delivering innovative, data-driven solutions for local businesses. Conducted over 10 workshops in collaboration with industry experts to strengthen member capabilities in IT strategy, analytics, and client communications.",
   },
   {
     org: "Bucknell Data Science Club",
@@ -23,7 +23,7 @@ const LEADERSHIP = [
     location: "Lewisburg, PA",
     duration: "Oct 2022 – Aug 2023",
     description:
-      "Led 3 university hackathons and facilitated 8+ sessions focusing on real-world applications of Python, TensorFlow, and Tableau. Encouraged student engagement and data storytelling using tools like Jupyter and Matplotlib."
+      "Led 3 university hackathons and facilitated 8+ sessions focusing on real-world applications of Python, TensorFlow, and Tableau. Encouraged student engagement and data storytelling using tools like Jupyter and Matplotlib.",
   },
 ];
 
@@ -50,7 +50,7 @@ const Leadership = () => {
             whileInView={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-md hover:shadow-purple-800 transition-shadow duration-300"
+            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
           >
             <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
               <h3 className="text-xl font-semibold text-white">

@@ -1,6 +1,7 @@
 import { CONTACT } from "../constants";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { FaLinkedin, FaGithub, FaInstagram } from "react-icons/fa";
 
 const Contact = () => {
   const [form, setForm] = useState({
@@ -75,7 +76,7 @@ const Contact = () => {
         </button>
       </form>
 
-      {/* Optional Static Info */}
+      {/* Static Info */}
       <div className="text-center mt-16 tracking-tighter text-neutral-400">
         <p className="my-2">{CONTACT.address}</p>
         <p className="my-2">{CONTACT.phoneNo}</p>
@@ -84,6 +85,34 @@ const Contact = () => {
           className="text-purple-400 hover:underline"
         >
           {CONTACT.email}
+        </a>
+      </div>
+
+      {/* Socials */}
+      <div className="mt-12 flex justify-center gap-6 text-2xl text-white">
+        <a
+          href="https://www.linkedin.com/in/zohaibsafdarcheema/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-purple-400 transition-colors duration-200"
+        >
+          <FaLinkedin />
+        </a>
+        <a
+          href="https://github.com/zohaib-cheema"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-purple-400 transition-colors duration-200"
+        >
+          <FaGithub />
+        </a>
+        <a
+          href="https://www.instagram.com/zohaibcheema_"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-purple-400 transition-colors duration-200"
+        >
+          <FaInstagram />
         </a>
       </div>
     </section>

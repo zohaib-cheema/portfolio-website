@@ -36,7 +36,7 @@ const Experience = () => {
             whileInView={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-md hover:shadow-purple-800 transition-shadow duration-300 flex flex-col md:flex-row items-center gap-6"
+            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300 flex flex-col md:flex-row items-center gap-6"
           >
             {/* Company Logo */}
             {experience.logo && (
