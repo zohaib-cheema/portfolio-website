@@ -43,7 +43,7 @@ const Hero = () => {
         Zohaib Cheema
       </motion.h1>
 
-      {/* Line 3 */}
+      {/* Line 3 - Typewriter */}
       <motion.div
         variants={container(0.6)}
         initial="hidden"
@@ -53,9 +53,18 @@ const Hero = () => {
         <span className="bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
           <Typewriter
             words={[
-              "Full Stack Developer",
-              "React • Node • MongoDB",
-              "Crafting Scalable Web Apps",
+              "a Computer Science Major",
+              "a former SWE Intern at Uber",
+              "a SWE Instructor at iD Tech",
+              "the Founder & former GDSC Lead",
+              "the former President of Bucknell Data Science Club",
+              "the former President of Bucknell Consulting Group",
+              "a Full-Stack SWE Intern at Bucknell L&IT",
+              "an App Dev Intern at PA SBDC",
+              "an Elaine Langone Scholar",
+              "an NAE Grand Challenges Scholar",
+              "a Dancer & Choreographer",
+              "a Creative Events Programmer",
             ]}
             loop
             cursor
