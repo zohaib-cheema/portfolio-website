@@ -1,6 +1,6 @@
+import { motion } from "framer-motion";
 import { useState } from "react";
 import { EXPERIENCES } from "../constants";
-import { motion } from "framer-motion";
 
 const Experience = () => {
   const [activeExp, setActiveExp] = useState(null);
@@ -16,14 +16,14 @@ const Experience = () => {
   return (
     <section
       id="experience"
-      className="border-b border-neutral-900 pb-24 px-4 pt-28"
+      className="border-b border-neutral-900 pb-24 pt-28 px-6 sm:px-10 md:px-16"
     >
       {/* Section Title */}
       <motion.h2
         whileInView={{ opacity: 1, y: 0 }}
         initial={{ opacity: 0, y: -50 }}
         transition={{ duration: 0.5 }}
-        className="my-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
+        className="my-10 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         Work Experience
       </motion.h2>

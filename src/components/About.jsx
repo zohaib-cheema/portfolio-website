@@ -15,7 +15,7 @@ const About = () => {
   return (
     <section
       id="about"
-      className="px-4 pb-32 pt-28 border-b border-neutral-900"
+      className="px-6 sm:px-10 md:px-16 pb-32 pt-28 border-b border-neutral-900"
     >
       {/* Title */}
       <motion.h2
@@ -23,7 +23,7 @@ const About = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="mb-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
+        className="mb-10 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         About Me
       </motion.h2>

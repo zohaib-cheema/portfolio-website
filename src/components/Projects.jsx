@@ -16,7 +16,7 @@ const Projects = () => {
   return (
     <section
       id="projects"
-      className="border-b border-neutral-900 pb-24 px-4 pt-28"
+      className="border-b border-neutral-900 pb-24 pt-28 px-6 sm:px-10 md:px-16"
     >
       {/* Gradient Title */}
       <motion.h2
@@ -24,13 +24,19 @@ const Projects = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="my-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
+        className="my-10 pb-1 text-center text-6xl font-extrabold leading-[1.15] bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         Projects
       </motion.h2>
 
       {/* Project Grid */}
-      <div className="grid gap-12 md:grid-cols-2 xl:grid-cols-3 place-items-center">
+      <motion.div
+        variants={fadeIn(0.1)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="grid gap-12 md:grid-cols-2 xl:grid-cols-3 place-items-stretch"
+      >
         {displayedProjects.map((project, index) => (
           <motion.div
             key={index}
@@ -38,7 +44,7 @@ const Projects = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="w-full max-w-sm rounded-xl bg-neutral-900/40 p-5 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
+            className="w-full max-w-sm h-full flex flex-col justify-between rounded-xl bg-neutral-900/40 p-5 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
           >
             {/* Project Image */}
             <div className="overflow-hidden rounded-lg mb-4">
@@ -60,7 +66,7 @@ const Projects = () => {
             </p>
 
             {/* Tech Stack */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mt-auto">
               {project.technologies.map((tech, idx) => (
                 <span
                   key={idx}
@@ -72,10 +78,16 @@ const Projects = () => {
             </div>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* View All Projects Button */}
-      <div className="mt-16 flex justify-center">
+      <motion.div
+        variants={fadeIn(0.4)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="mt-16 flex justify-center"
+      >
         <a
           href="https://github.com/zohaib-cheema?tab=repositories"
           target="_blank"
@@ -84,7 +96,7 @@ const Projects = () => {
         >
           View All Projects →
         </a>
-      </div>
+      </motion.div>
     </section>
   );
 };

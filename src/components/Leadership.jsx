@@ -31,14 +31,14 @@ const Leadership = () => {
   return (
     <section
       id="leadership"
-      className="border-b border-neutral-900 pb-24 px-4 pt-28"
+      className="border-b border-neutral-900 pb-24 pt-28 px-6 sm:px-10 md:px-16"
     >
       {/* Gradient Title */}
       <motion.h2
         whileInView={{ opacity: 1, y: 0 }}
         initial={{ opacity: 0, y: -100 }}
         transition={{ duration: 0.5 }}
-        className="my-20 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
+        className="my-10 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         Leadership Experience
       </motion.h2>
