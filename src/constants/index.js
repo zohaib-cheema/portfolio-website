@@ -1,10 +1,10 @@
+import bucknellLogo from "../assets/Bucknell.png";
+import sbdcLogo from "../assets/SBDC.jpeg";
+import idtechLogo from "../assets/idtech.png";
 import project1 from "../assets/projects/project-1.jpg";
 import project2 from "../assets/projects/project-2.jpg";
 import project3 from "../assets/projects/project-3.jpg";
 import uberLogo from "../assets/uber.png";
-import sbdcLogo from "../assets/SBDC.jpeg";
-import idtechLogo from "../assets/idtech.png";
-import bucknellLogo from "../assets/Bucknell.png";
 
 export const HERO_CONTENT = `I am a passionate full stack developer with a knack for crafting robust and scalable web applications. With 5 years of hands-on experience, I have honed my skills in front-end technologies like React and Next.js, as well as back-end technologies like Node.js, MySQL, PostgreSQL, and MongoDB. My goal is to leverage my expertise to create innovative solutions that drive business growth and deliver exceptional user experiences.`;
 
@@ -33,7 +33,7 @@ export const EXPERIENCES = [
     role: "Full-Stack Software Engineer Intern",
     company: "Bucknell L&IT Services",
     logo: bucknellLogo,
-    description: `Built and launched a full-stack library web app using React, Node, Tailwind CSS, and Firebase for 4000+ users. Designed a PostgreSQL database with REST APIs to manage inventory and user data, reducing manual tasks by 40%.`,
+    description: `Deployed a React-based internal dashboard used by L&IT Equipment Services to track 1,200+ active loaned devices, integrating live data from the Library PostgreSQL system via custom Node.js APIs. Built RESTful API endpoints using Node.js to generate inventory summaries, flag overdue returns, and log usage activity, helping streamline backend operations and reduce manual record-keeping by over 40%.`,
     technologies: ["React", "Node", "Tailwind CSS", "Firebase", "PostgreSQL", "REST APIs"],
   },
   {
