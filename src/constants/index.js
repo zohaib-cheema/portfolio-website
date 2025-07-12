@@ -31,7 +31,7 @@ export const EXPERIENCES = [
     role: "Full-Stack Software Engineer Intern",
     company: "Bucknell L&IT Services",
     logo: bucknellLogo,
-    description: `Created an iOS app for a local bakery using Swift and Figma, streamlining order flow and reducing wait times by 35%. Integrated MongoDB to manage orders and inventory, saving 10+ hours of manual tracking weekly.`,
+    description: `Reduced manual record-keeping by over 40% by building a React-based dashboard for L&IT Equipment Services to track 1,200+ devices, integrating live PostgreSQL data and custom Node.js APIs for inventory summaries, overdue flags, and activity logs.`,
     technologies: ["React", "PostgreSQL", "Node.js", "RESTful API"],
   },
 ];
@@ -63,5 +63,5 @@ export const PROJECTS = [
 export const CONTACT = {
   address: "140 North Clinton Ave, Bay Shore, NY 11706 ",
   phoneNo: "+1 619-897-5041 ",
-  email: "zohaib.s.cheema92@gmail.com",
+  email: "zohaib.s.cheema9@gmail.com",
 };

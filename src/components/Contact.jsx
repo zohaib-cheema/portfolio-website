@@ -1,7 +1,7 @@
-import { CONTACT } from "../constants";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { FaLinkedin, FaGithub, FaInstagram } from "react-icons/fa";
+import { FaGithub, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { CONTACT } from "../constants";
 
 const Contact = () => {
   const [form, setForm] = useState({
@@ -20,9 +20,8 @@ const Contact = () => {
     const body = encodeURIComponent(
       `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`
     );
-    window.location.href = `mailto:zohaib.s.cheema92@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:zohaib.s.cheema9@gmail.com?subject=${subject}&body=${body}`;
   };
-
   return (
     <section
       id="contact"

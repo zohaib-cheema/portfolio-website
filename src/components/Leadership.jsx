@@ -7,15 +7,15 @@ const LEADERSHIP = [
     location: "Lewisburg, PA",
     duration: "Aug 2023 – Jun 2024",
     description:
-      "Launched and led the GDSC chapter at my college, guiding 90+ students through hands-on learning of emerging technologies. Worked closely with Google representatives to organize 6+ expert-led talks that shaped the club's long-term goals and technical direction.",
+      "Taught full-stack app development using Next.js to students after founding GDSC chapter at Bucknell University. Worked closely with Google representatives to organize 6+ expert-led talks that shaped the club's long-term goals and technical direction.",
   },
   {
-    org: "Microsoft “Data For Good” National Competition",
-    role: "Team Lead",
-    location: "Purdue, IN",
-    duration: "Sep 2023 – Nov 2023",
+    org: "Bucknell Consulting Group",
+    role: "President",
+    location: "Lewisburg, PA",
+    duration: "Jan 2023 – Dec 2023",
     description:
-      "Led Bucknell’s Data Science Club to 23rd place out of 290 undergraduate and graduate teams, and built a Python-based automation system using the flan-t5-large LLM to generate structured documentation from medical transcripts.",
+      "Directed 3 tech-consulting projects with student teams, delivering innovative, data-driven solutions for local businesses. Conducted over 10 workshops in collaboration with industry experts to strengthen member capabilities in IT strategy, analytics, and client communications.",
   },
   {
     org: "Bucknell Data Science Club",

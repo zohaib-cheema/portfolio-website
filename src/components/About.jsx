@@ -73,7 +73,7 @@ const About = () => {
             I’ve spent 180+ hours teaching coding to students and underserved communities because I believe tech should be for everyone. I’ve built 50+ technical projects (from web/mobile apps to analytical dashboards) that have helped solve real-world problems. And when I’m not deep in code, I’m either dancing or choreographing a dance performance 🕺. It’s my favorite creative outlet.
           </p>
           <p>
-            If anything here sparks a convo, I’d love to hear from you! Reach out anytime at <span className="underline">zohaib.s.cheema92@gmail.com</span> 🙂
+            If anything here sparks a convo, I’d love to hear from you! Reach out anytime at <span className="underline">zohaib.s.cheema9@gmail.com</span> 🙂
           </p>
         </motion.div>
       </div>
