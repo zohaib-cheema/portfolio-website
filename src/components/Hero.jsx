@@ -21,14 +21,14 @@ const Hero = () => {
   return (
     <section
       id="hero"
-      className="pt-24 sm:pt-32 md:pt-[280px] pb-20 sm:pb-28 md:pb-[240px] px-4 flex flex-col items-center text-center"
+      className="pt-[280px] pb-[240px] px-4 flex flex-col items-center text-center"
     >
       {/* Line 1 */}
       <motion.h2
         variants={container(0)}
         initial="hidden"
         animate="visible"
-        className="text-3xl sm:text-4xl md:text-6xl font-bold text-white"
+        className="text-6xl md:text-8xl font-bold text-white"
       >
         Hi there! I'm
       </motion.h2>
@@ -38,48 +38,48 @@ const Hero = () => {
         variants={container(0.3)}
         initial="hidden"
         animate="visible"
-        className="mt-2 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent text-4xl sm:text-5xl md:text-8xl font-semibold"
+        className="mt-4 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent text-8xl md:text-9xl font-semibold"
       >
         Zohaib Cheema
       </motion.h1>
 
-      {/* Typewriter Line */}
-      <motion.div
-        variants={container(0.6)}
-        initial="hidden"
-        animate="visible"
-        className="mt-4 text-base sm:text-lg md:text-2xl font-semibold max-w-[90vw] sm:max-w-full"
-      >
-        <span className="bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
-          <Typewriter
-            words={[
-              "a SWE Instructor at iD Tech",
-              "the Founder & former GDSC Lead",
-              "a Computer Science Major",
-              "a former SWE Intern at Uber",
-              "the former President of Bucknell Data Science Club",
-              "the former President of Bucknell Consulting Group",
-              "a Full-Stack SWE Intern at Bucknell L&IT",
-              "an App Dev Intern at PA SBDC",
-              "an Elaine Langone Scholar",
-              "an NAE Grand Challenges Scholar",
-              "a Dancer & Choreographer",
-              "a Creative Events Programmer",
-            ]}
-            loop
-            cursor
-            cursorStyle="_"
-            typeSpeed={65}
-            deleteSpeed={40}
-            delaySpeed={1200}
-          />
-        </span>
-      </motion.div>
+{/* Line 3 - Typewriter */}
+<motion.div
+  variants={container(0.6)}
+  initial="hidden"
+  animate="visible"
+  className="mt-6 text-2xl sm:text-3xl md:text-4xl font-semibold max-w-screen-sm sm:max-w-none truncate"
+>
+  <span className="bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent whitespace-nowrap">
+    <Typewriter
+      words={[
+        "a SWE Intern at Uber",
+        "a GDSC Lead",
+        "a SWE Instructor at iD Tech",
+        "a CS Major",
+        "a Data Science Club Co-President",
+        "a Bucknell Consultant",
+        "a Full-Stack SWE Intern",
+        "an App Dev Intern",
+        "a Langone Scholar",
+        "a Grand Challenges Scholar",
+        "a Dancer & Choreographer",
+        "a Creative Coder",
+      ]}
+      loop
+      cursor
+      cursorStyle="_"
+      typeSpeed={65}
+      deleteSpeed={40}
+      delaySpeed={1200}
+    />
+  </span>
+</motion.div>
 
-      {/* Scroll Down Arrow */}
+      {/* Scroll Arrow */}
       <motion.button
         whileHover={{ scale: 1.1 }}
-        className="mt-20 sm:mt-32 text-white text-3xl sm:text-4xl animate-bounce"
+        className="mt-44 text-white text-4xl animate-bounce"
         onClick={scrollToSection}
       >
         ↓
