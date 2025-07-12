@@ -21,14 +21,14 @@ const Hero = () => {
   return (
     <section
       id="hero"
-      className="pt-[280px] pb-[240px] px-4 flex flex-col items-center text-center"
+      className="pt-[180px] pb-[180px] px-4 flex flex-col items-center text-center"
     >
       {/* Line 1 */}
       <motion.h2
         variants={container(0)}
         initial="hidden"
         animate="visible"
-        className="text-6xl md:text-8xl font-bold text-white"
+        className="text-3xl sm:text-4xl md:text-6xl font-bold text-white"
       >
         Hi there! I'm
       </motion.h2>
@@ -38,7 +38,7 @@ const Hero = () => {
         variants={container(0.3)}
         initial="hidden"
         animate="visible"
-        className="mt-4 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent text-8xl md:text-9xl font-semibold"
+        className="mt-2 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent text-4xl sm:text-5xl md:text-8xl font-semibold"
       >
         Zohaib Cheema
       </motion.h1>
@@ -48,7 +48,7 @@ const Hero = () => {
         variants={container(0.6)}
         initial="hidden"
         animate="visible"
-        className="mt-6 text-4xl md:text-6xl font-semibold"
+        className="mt-4 text-lg sm:text-xl md:text-4xl font-semibold max-w-[90vw] sm:max-w-full"
       >
         <span className="bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
           <Typewriter
@@ -79,7 +79,7 @@ const Hero = () => {
       {/* Scroll Arrow */}
       <motion.button
         whileHover={{ scale: 1.1 }}
-        className="mt-44 text-white text-4xl animate-bounce"
+        className="mt-32 text-white text-3xl sm:text-4xl animate-bounce"
         onClick={scrollToSection}
       >
         ↓

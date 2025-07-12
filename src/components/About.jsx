@@ -1,5 +1,5 @@
-import aboutImg from "../assets/about.jpg";
 import { motion } from "framer-motion";
+import aboutImg from "../assets/about.jpg";
 
 const fadeIn = (x = 0, y = 0, delay = 0) => ({
   hidden: { opacity: 0, x, y },
@@ -15,7 +15,7 @@ const About = () => {
   return (
     <section
       id="about"
-      className="px-6 sm:px-10 md:px-16 pb-32 pt-28 border-b border-neutral-900"
+      className="px-4 sm:px-8 md:px-16 pb-24 pt-20 border-b border-neutral-900"
     >
       {/* Title */}
       <motion.h2
@@ -23,22 +23,22 @@ const About = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="mb-10 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
+        className="mb-10 text-center text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         About Me
       </motion.h2>
 
       {/* Container */}
-      <div className="mx-auto max-w-6xl flex flex-col lg:flex-row items-center lg:items-start bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-8 rounded-3xl shadow-lg gap-10">
+      <div className="mx-auto max-w-6xl flex flex-col lg:flex-row items-center lg:items-start bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-4 sm:p-8 rounded-3xl shadow-lg gap-8 sm:gap-10">
         {/* Image with Linktree Hover */}
         <motion.div
           variants={fadeIn(-60, 0, 0.2)}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="w-full lg:w-[45%] h-full"
+          className="w-full lg:w-[45%]"
         >
-          <div className="relative h-full overflow-hidden rounded-2xl shadow-md group">
+          <div className="relative overflow-hidden rounded-2xl shadow-md group w-full h-full">
             <img
               src={aboutImg}
               alt="Zohaib Cheema"
@@ -48,7 +48,7 @@ const About = () => {
               href="https://linktr.ee/zohaib_cheema"
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-lg font-semibold"
+              className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-base sm:text-lg font-semibold"
             >
               Visit My Linktree
             </a>
@@ -61,7 +61,7 @@ const About = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="w-full lg:w-[55%] flex flex-col justify-center text-neutral-200 text-lg md:text-xl space-y-6"
+          className="w-full lg:w-[55%] flex flex-col justify-center text-neutral-200 text-base sm:text-lg md:text-xl space-y-5"
         >
           <p>
             Hey there! I’m Zohaib (Zo-hey-b), a Computer Science and Math student who loves building things that actually help people.

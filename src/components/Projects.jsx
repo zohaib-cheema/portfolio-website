@@ -1,5 +1,5 @@
-import { PROJECTS } from "../constants";
 import { motion } from "framer-motion";
+import { PROJECTS } from "../constants";
 
 const fadeIn = (delay = 0) => ({
   hidden: { opacity: 0, y: 30 },
@@ -24,7 +24,7 @@ const Projects = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true }}
-        className="my-10 pb-1 text-center text-6xl font-extrabold leading-[1.15] bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
+        className="my-10 pb-1 text-center text-4xl sm:text-5xl md:text-6xl font-extrabold leading-[1.15] bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         Projects
       </motion.h2>

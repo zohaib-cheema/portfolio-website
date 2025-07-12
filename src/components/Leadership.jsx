@@ -31,38 +31,43 @@ const Leadership = () => {
   return (
     <section
       id="leadership"
-      className="border-b border-neutral-900 pb-24 pt-28 px-6 sm:px-10 md:px-16"
+      className="border-b border-neutral-900 pb-20 pt-20 px-4 sm:px-8 md:px-16"
     >
-      {/* Gradient Title */}
+      {/* Title */}
       <motion.h2
         whileInView={{ opacity: 1, y: 0 }}
         initial={{ opacity: 0, y: -100 }}
         transition={{ duration: 0.5 }}
-        className="my-10 text-center text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
+        className="my-10 text-center text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent"
       >
         Leadership Experience
       </motion.h2>
 
-      <div className="flex flex-col items-center space-y-10">
+      <div className="flex flex-col items-center space-y-8 sm:space-y-10">
         {LEADERSHIP.map((item, index) => (
           <motion.div
             key={index}
             whileInView={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 50 }}
             transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-6 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
+            className="w-full max-w-4xl rounded-xl bg-neutral-900/40 p-4 sm:p-6 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
           >
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-2">
-              <h3 className="text-xl font-semibold text-white">
+            {/* Header row */}
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-white">
                 {item.org}{" "}
                 <span className="text-purple-300 font-normal">— {item.role}</span>
               </h3>
-              <span className="text-sm text-neutral-400 mt-2 md:mt-0">
+              <span className="text-sm text-neutral-400 mt-1 sm:mt-0">
                 {item.duration}
               </span>
             </div>
+
+            {/* Location */}
             <p className="italic text-sm text-neutral-400 mb-2">{item.location}</p>
-            <p className="text-neutral-300 text-base leading-relaxed">
+
+            {/* Description */}
+            <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
               {item.description}
             </p>
           </motion.div>
