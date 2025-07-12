@@ -1,5 +1,4 @@
 import bucknellLogo from "../assets/Bucknell.png";
-import sbdcLogo from "../assets/SBDC.jpeg";
 import idtechLogo from "../assets/idtech.png";
 import project1 from "../assets/projects/project-1.jpg";
 import project2 from "../assets/projects/project-2.jpg";
@@ -12,37 +11,28 @@ export const ABOUT_TEXT = `Hi! I’m Zohaib (Zo-hey-b), a Computer Science and M
 
 export const EXPERIENCES = [
   {
-    year: "Sep 2023 – Present",
-    role: "Software Engineering Instructor",
-    company: "iD Tech",
-    logo: idtechLogo,
-    description: `Spearheaded instruction for 70+ students in Python, Java, ML, and AI development using TensorFlow and OpenAI. Built project-based modules that improved debugging efficiency by 34% and raised proficiency and satisfaction scores.`,
-    technologies: ["Python", "Java", "TensorFlow", "OpenAI", "ML", "AI"],
-  },
-  {
     year: "May 2024 – Aug 2024",
     role: "Software Engineer Intern",
     company: "Uber",
     logo: uberLogo,
-    description:
-      "Worked on ride optimization systems using microservices and API integrations.",
-    technologies: ["Node.js", "TypeScript", "Redis", "Kubernetes"],
+    description: `Improved order accuracy by 27% for 200 Uber Eats merchants and boosted Uber One adoption across 9 countries (10M users) by architecting a real-time Kafka-FlinkSQL-Pinot pipeline and building a validated migration system with A/B-tested Go/TypeScript rollouts.`,
+    technologies: ["Kafka", "FlinkSQL", "Go", "Typescript", "Pinot"],
   },
   {
-    year: "Aug 2023 – Apr 2024",
+    year: "Dec 2024 – May 2025",
+    role: "AI/ML Engineer Intern",
+    company: "iD Tech",
+    logo: idtechLogo,
+    description: `Taught 70+ students DSA in Python and AI chatbot development, and led workshops on building multi-agent GPT-3.5/Microsoft AutoGen chatbots to generate and debug Gurobi code for supply chain optimization.`,
+    technologies: ["Python", "AI", "GPT-3.5", "Microsoft AutoGen", "Gurobi"],
+  },
+  {
+    year: "Aug 2023 – April 2024",
     role: "Full-Stack Software Engineer Intern",
     company: "Bucknell L&IT Services",
     logo: bucknellLogo,
-    description: `Deployed a React-based internal dashboard used by L&IT Equipment Services to track 1,200+ active loaned devices, integrating live data from the Library PostgreSQL system via custom Node.js APIs. Built RESTful API endpoints using Node.js to generate inventory summaries, flag overdue returns, and log usage activity, helping streamline backend operations and reduce manual record-keeping by over 40%.`,
-    technologies: ["React", "Node", "Tailwind CSS", "Firebase", "PostgreSQL", "REST APIs"],
-  },
-  {
-    year: "May 2023 – Aug 2023",
-    role: "App Development Intern",
-    company: "PA Small Business Development Center",
-    logo: sbdcLogo,
     description: `Created an iOS app for a local bakery using Swift and Figma, streamlining order flow and reducing wait times by 35%. Integrated MongoDB to manage orders and inventory, saving 10+ hours of manual tracking weekly.`,
-    technologies: ["iOS", "Swift", "Figma", "MongoDB"],
+    technologies: ["React", "PostgreSQL", "Node.js", "RESTful API"],
   },
 ];
 
@@ -53,14 +43,12 @@ export const PROJECTS = [
     image: project2,
     description:
       "PayPie is a web app designed to simplify expense splitting for groups, whether for travel, shared living, or collaborative projects. With features like smart cost splitting, real-time updates, and receipt scanning, PayPie streamlines the process of managing and settling group finances.",    technologies: ["React", "Next.js", "Firebase", "AWS Lambda", "Gemini Gen AI"],
-    link: "https://github.com/yourusername/paypie",
   },
   {
     title: "AwareNest",
     image: project1,
     description:
       "AwareNest is a mental health app designed to help users track their emotional well-being, log moods, and access mindfulness content. The app uses personalized emotion analysis to provide targeted suggestions and improve mental health tracking over time.",    technologies: ["Dart", "MySQL", "C++"],
-    link: "https://github.com/yourusername/awarenest",
   },
   {
     title: "DeFacto",
@@ -68,7 +56,6 @@ export const PROJECTS = [
     description:
       "DeFacto is a machine learning-based tool that classifies fake news articles using a hybrid model built with Scikit-learn, TensorFlow, and Keras. The system analyzes social and political content to detect deception in news stories and social media posts, providing a reliable solution to address the growing issue of misinformation.",
     technologies: ["Scikit-learn", "TensorFlow", "Keras", "R", "Pandas", "NumPy"],
-    link: "https://github.com/yourusername/defacto",
   },
 ];
 
