@@ -21,7 +21,7 @@ const Hero = () => {
   return (
     <section
       id="hero"
-      className="pt-[180px] pb-[180px] px-4 flex flex-col items-center text-center"
+      className="pt-24 sm:pt-32 md:pt-[280px] pb-20 sm:pb-28 md:pb-[240px] px-4 flex flex-col items-center text-center"
     >
       {/* Line 1 */}
       <motion.h2
@@ -43,20 +43,20 @@ const Hero = () => {
         Zohaib Cheema
       </motion.h1>
 
-      {/* Line 3 - Typewriter */}
+      {/* Typewriter Line */}
       <motion.div
         variants={container(0.6)}
         initial="hidden"
         animate="visible"
-        className="mt-4 text-lg sm:text-xl md:text-4xl font-semibold max-w-[90vw] sm:max-w-full"
+        className="mt-4 text-base sm:text-lg md:text-2xl font-semibold max-w-[90vw] sm:max-w-full"
       >
         <span className="bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
           <Typewriter
             words={[
-              "a Computer Science Major",
-              "a former SWE Intern at Uber",
               "a SWE Instructor at iD Tech",
               "the Founder & former GDSC Lead",
+              "a Computer Science Major",
+              "a former SWE Intern at Uber",
               "the former President of Bucknell Data Science Club",
               "the former President of Bucknell Consulting Group",
               "a Full-Stack SWE Intern at Bucknell L&IT",
@@ -76,10 +76,10 @@ const Hero = () => {
         </span>
       </motion.div>
 
-      {/* Scroll Arrow */}
+      {/* Scroll Down Arrow */}
       <motion.button
         whileHover={{ scale: 1.1 }}
-        className="mt-32 text-white text-3xl sm:text-4xl animate-bounce"
+        className="mt-20 sm:mt-32 text-white text-3xl sm:text-4xl animate-bounce"
         onClick={scrollToSection}
       >
         ↓
