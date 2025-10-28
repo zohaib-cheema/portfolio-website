@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import Projects from "./components/Projects";
 import Technologies from "./components/Technologies";
 import Leadership from "./components/Leadership";
+import TraitsConvergence from "./components/TraitsConvergence";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
       <div className="container mx-auto px-8">
         <Navbar />
         <Hero />
+        <TraitsConvergence />
         <About />
         <Experience />
         <Leadership />
