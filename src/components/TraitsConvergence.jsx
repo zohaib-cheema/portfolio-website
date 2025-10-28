@@ -104,7 +104,7 @@ const TraitsConvergence = () => {
     <section
       ref={sectionRef}
       id="traits"
-      className="relative min-h-screen flex flex-col items-center justify-start px-4 py-20 border-b border-neutral-900"
+      className="relative flex flex-col items-center justify-start border-b border-neutral-900 pb-24 pt-20 px-4 sm:px-8 md:px-16"
     >
       {/* Title */}
       <motion.h2
@@ -118,7 +118,7 @@ const TraitsConvergence = () => {
       </motion.h2>
 
       {/* Central container for circles */}
-      <div className="relative w-full max-w-4xl flex-1 flex items-center justify-center z-10 min-h-[500px]">
+      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[500px] sm:h-[600px]">
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
