@@ -5,12 +5,23 @@ import profileImg from "../assets/about.jpg";
 const TraitsConvergence = () => {
   const sectionRef = useRef(null);
   const [isLocked, setIsLocked] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   // Motion value to track animation progress (0 to 1)
   const progress = useMotionValue(0);
   
   // Track if animation is complete
   const [animationComplete, setAnimationComplete] = useState(false);
+  
+  // Detect if mobile on mount
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // Tailwind's md breakpoint
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Transform progress into circle positions
   const circle1X = useTransform(progress, [0, 0.6], [0, 0]);
@@ -26,24 +37,24 @@ const TraitsConvergence = () => {
   const mergedOpacity = useTransform(progress, [0.6, 0.9], [0, 1]);
   const mergedScale = useTransform(progress, [0.6, 0.9], [0.8, 1]);
 
+  // ==========================================
+  // DESKTOP SCROLL HANDLING (Wheel Events)
+  // ==========================================
   useEffect(() => {
+    if (isMobile) return; // Skip desktop logic on mobile
+    
     const section = sectionRef.current;
     if (!section) return;
 
     let accumulatedDelta = 0;
-    const scrollSensitivity = 0.0008; // Lower = more scrolling needed
-    const touchSensitivity = 0.0015; // Touch sensitivity for mobile (increased)
-    let touchStartY = 0;
-    let lastTouchY = 0;
-    let lastScrollY = window.pageYOffset;
-    let momentumScrollRAF = null;
+    const DESKTOP_SCROLL_SENSITIVITY = 0.0008; // DESKTOP: Lower = more scrolling needed
+    const DESKTOP_RESET_THRESHOLD = 0.05; // DESKTOP: Threshold for resetting animation
 
     // Intersection Observer to detect when section is in view
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && entry.intersectionRatio > 0.5 && !isLocked && !animationComplete) {
-            // Section is more than 50% visible and we haven't started
             const rect = section.getBoundingClientRect();
             if (rect.top < window.innerHeight / 2 && rect.top > -100) {
               setIsLocked(true);
@@ -60,27 +71,27 @@ const TraitsConvergence = () => {
     observer.observe(section);
 
     const handleWheel = (e) => {
-      // If locked and animation not complete, hijack scroll
+      // DESKTOP: If locked and animation not complete, hijack scroll
       if (isLocked && !animationComplete) {
         e.preventDefault();
         e.stopPropagation();
 
-        // Accumulate scroll delta
-        accumulatedDelta += e.deltaY * scrollSensitivity;
+        // DESKTOP: Accumulate scroll delta
+        accumulatedDelta += e.deltaY * DESKTOP_SCROLL_SENSITIVITY;
         accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
 
         // Update progress
         progress.set(accumulatedDelta);
 
-        // Check if animation is complete
+        // DESKTOP: Check if animation is complete
         if (accumulatedDelta >= 0.99) {
           setAnimationComplete(true);
           setIsLocked(false);
         }
       }
       
-      // Allow scrolling backwards to reset
-      if (isLocked && e.deltaY < 0 && accumulatedDelta <= 0.05) {
+      // DESKTOP: Allow scrolling backwards to reset
+      if (isLocked && e.deltaY < 0 && accumulatedDelta <= DESKTOP_RESET_THRESHOLD) {
         setIsLocked(false);
         setAnimationComplete(false);
         accumulatedDelta = 0;
@@ -88,16 +99,59 @@ const TraitsConvergence = () => {
       }
     };
 
+    // DESKTOP: Add wheel event listener only
+    document.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("wheel", handleWheel);
+    };
+  }, [isLocked, animationComplete, progress, isMobile]);
+
+  // ==========================================
+  // MOBILE TOUCH HANDLING (Touch Events)
+  // ==========================================
+  useEffect(() => {
+    if (!isMobile) return; // Skip mobile logic on desktop
+    
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let accumulatedDelta = 0;
+    const MOBILE_TOUCH_SENSITIVITY = 0.0015; // MOBILE: Touch sensitivity
+    const MOBILE_SWIPE_THRESHOLD = 10; // MOBILE: Min pixels to swipe before locking
+    const MOBILE_RESET_THRESHOLD = 0.05; // MOBILE: Threshold for resetting animation
+    let touchStartY = 0;
+    let lastTouchY = 0;
+
+    // Intersection Observer to detect when section is in view
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5 && !isLocked && !animationComplete) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight / 2 && rect.top > -100) {
+              setIsLocked(true);
+              accumulatedDelta = 0;
+              progress.set(0);
+              setAnimationComplete(false);
+            }
+          }
+        });
+      },
+      { threshold: [0.3, 0.5, 0.7] }
+    );
+
+    observer.observe(section);
+
     const handleTouchStart = (e) => {
       const rect = section.getBoundingClientRect();
       touchStartY = e.touches[0].clientY;
       lastTouchY = e.touches[0].clientY;
       
-      // Check if touch started within or near the section
+      // MOBILE: Check if touch started within or near the section
       if (rect.top < window.innerHeight && rect.bottom > 0) {
-        // Section is visible, prepare for potential lock
         if (rect.top < window.innerHeight / 2 && rect.top > -100 && !isLocked && !animationComplete) {
-          // Store that we're in the active zone
           touchStartY = e.touches[0].clientY;
         }
       }
@@ -107,12 +161,12 @@ const TraitsConvergence = () => {
       const rect = section.getBoundingClientRect();
       const touchY = e.touches[0].clientY;
       
-      // Check if we should lock (section is in view and user is swiping)
+      // MOBILE: Check if we should lock (section is in view and user is swiping)
       if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
         const deltaFromStart = touchStartY - touchY;
-        // If user has swiped up at least 10px, lock the section
-        if (deltaFromStart > 10) {
-          e.preventDefault(); // Prevent immediately
+        // MOBILE: If user has swiped up threshold amount, lock the section
+        if (deltaFromStart > MOBILE_SWIPE_THRESHOLD) {
+          e.preventDefault();
           setIsLocked(true);
           accumulatedDelta = 0;
           progress.set(0);
@@ -120,14 +174,15 @@ const TraitsConvergence = () => {
         }
       }
       
+      // MOBILE: If locked, hijack touch scrolling
       if (isLocked && !animationComplete) {
         e.preventDefault();
-        e.stopPropagation(); // Stop event from bubbling
+        e.stopPropagation();
         
         const deltaY = lastTouchY - touchY; // Positive when swiping up
         
-        // Accumulate the delta
-        accumulatedDelta += deltaY * touchSensitivity;
+        // MOBILE: Accumulate the delta
+        accumulatedDelta += deltaY * MOBILE_TOUCH_SENSITIVITY;
         accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
         
         // Update progress
@@ -136,15 +191,15 @@ const TraitsConvergence = () => {
         // Update last touch position
         lastTouchY = touchY;
         
-        // Check if animation is complete
+        // MOBILE: Check if animation is complete
         if (accumulatedDelta >= 0.99) {
           setAnimationComplete(true);
           setIsLocked(false);
         }
       }
       
-      // Allow scrolling backwards to reset
-      if (isLocked && accumulatedDelta <= 0.05) {
+      // MOBILE: Allow scrolling backwards to reset
+      if (isLocked && accumulatedDelta <= MOBILE_RESET_THRESHOLD) {
         const deltaY = lastTouchY - touchY;
         if (deltaY < 0) { // Swiping down
           setIsLocked(false);
@@ -155,80 +210,16 @@ const TraitsConvergence = () => {
       }
     };
 
-    // Handle momentum/flick scrolling on mobile
-    const handleMomentumScroll = () => {
-      if (!isLocked || animationComplete) {
-        lastScrollY = window.pageYOffset;
-        return;
-      }
-
-      const currentScrollY = window.pageYOffset;
-      const scrollDelta = currentScrollY - lastScrollY;
-
-      if (Math.abs(scrollDelta) > 0) {
-        // Scrolling is happening (momentum or active)
-        // Progress the animation based on scroll delta
-        accumulatedDelta += Math.abs(scrollDelta) * scrollSensitivity * 2;
-        accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
-        
-        progress.set(accumulatedDelta);
-
-        // Check if animation is complete
-        if (accumulatedDelta >= 0.99) {
-          setAnimationComplete(true);
-          setIsLocked(false);
-        }
-
-        // Keep trying to lock scroll position (for momentum)
-        if (isLocked && !animationComplete) {
-          window.scrollTo(0, lastScrollY);
-        }
-      }
-
-      lastScrollY = window.pageYOffset;
-
-      // Continue checking on next frame
-      if (isLocked && !animationComplete) {
-        momentumScrollRAF = requestAnimationFrame(handleMomentumScroll);
-      }
-    };
-
-    const handleScroll = () => {
-      const rect = section.getBoundingClientRect();
-      
-      // Start momentum tracking when locked
-      if (isLocked && !animationComplete && !momentumScrollRAF) {
-        momentumScrollRAF = requestAnimationFrame(handleMomentumScroll);
-      }
-      
-      // Check if we should auto-lock when scrolling into view
-      if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
-        setIsLocked(true);
-        accumulatedDelta = 0;
-        progress.set(0);
-        setAnimationComplete(false);
-        lastScrollY = window.pageYOffset;
-        momentumScrollRAF = requestAnimationFrame(handleMomentumScroll);
-      }
-    };
-
-    // Add event listeners
-    document.addEventListener("wheel", handleWheel, { passive: false });
+    // MOBILE: Add touch event listeners only
     document.addEventListener("touchstart", handleTouchStart, { passive: true });
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       observer.disconnect();
-      if (momentumScrollRAF) {
-        cancelAnimationFrame(momentumScrollRAF);
-      }
-      document.removeEventListener("wheel", handleWheel);
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("scroll", handleScroll);
     };
-  }, [isLocked, animationComplete, progress]);
+  }, [isLocked, animationComplete, progress, isMobile]);
 
   const traits = [
     { 
