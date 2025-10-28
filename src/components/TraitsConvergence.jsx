@@ -16,26 +16,26 @@ const TraitsConvergence = () => {
   // Each circle moves from its initial position to center (0, 0)
   // Animation progresses as user scrolls through this locked section
   
-  // Top circle (Collaborative Leader) - starts top center
-  const circle1X = useTransform(scrollYProgress, [0, 0.5], [0, 0]);
-  const circle1Y = useTransform(scrollYProgress, [0, 0.5], [-200, 0]);
+  // Top circle (Collaborative Leader) - starts top center, further away
+  const circle1X = useTransform(scrollYProgress, [0, 0.6], [0, 0]);
+  const circle1Y = useTransform(scrollYProgress, [0, 0.6], [-180, 0]);
   
-  // Bottom left circle (Continuous Learner)
-  const circle2X = useTransform(scrollYProgress, [0, 0.5], [-200, 0]);
-  const circle2Y = useTransform(scrollYProgress, [0, 0.5], [100, 0]);
+  // Bottom left circle (Continuous Learner) - starts bottom left
+  const circle2X = useTransform(scrollYProgress, [0, 0.6], [-220, 0]);
+  const circle2Y = useTransform(scrollYProgress, [0, 0.6], [140, 0]);
   
-  // Bottom right circle (Problem Solver)
-  const circle3X = useTransform(scrollYProgress, [0, 0.5], [200, 0]);
-  const circle3Y = useTransform(scrollYProgress, [0, 0.5], [100, 0]);
+  // Bottom right circle (Problem Solver) - starts bottom right
+  const circle3X = useTransform(scrollYProgress, [0, 0.6], [220, 0]);
+  const circle3Y = useTransform(scrollYProgress, [0, 0.6], [140, 0]);
   
   // Opacity for trait text (fade out as circles merge)
-  const traitsOpacity = useTransform(scrollYProgress, [0.3, 0.5], [1, 0]);
+  const traitsOpacity = useTransform(scrollYProgress, [0.4, 0.6], [1, 0]);
   
   // Opacity for merged content (fade in after merge)
-  const mergedOpacity = useTransform(scrollYProgress, [0.5, 0.8], [0, 1]);
+  const mergedOpacity = useTransform(scrollYProgress, [0.6, 0.9], [0, 1]);
   
   // Scale for merged circle
-  const mergedScale = useTransform(scrollYProgress, [0.5, 0.8], [0.8, 1]);
+  const mergedScale = useTransform(scrollYProgress, [0.6, 0.9], [0.8, 1]);
 
   const traits = [
     { 
@@ -61,23 +61,23 @@ const TraitsConvergence = () => {
   return (
     <section
       ref={containerRef}
-      className="relative h-[200vh] border-b border-neutral-900"
+      className="relative h-[300vh] border-b border-neutral-900"
     >
       {/* Sticky container that holds position while animation plays */}
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
-        {/* Title */}
+      <div className="sticky top-0 h-screen flex flex-col items-center justify-start px-4 overflow-hidden pt-16">
+        {/* Title - Higher z-index to stay above circles */}
         <motion.h2
           initial={{ opacity: 0, y: -50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="absolute top-20 w-full text-center text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent px-4"
+          className="relative z-20 mb-8 w-full text-center text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent px-4"
         >
           What Drives Me
         </motion.h2>
 
-        {/* Central container for circles */}
-        <div className="relative w-full max-w-4xl h-[600px] flex items-center justify-center">
+        {/* Central container for circles - positioned below heading */}
+        <div className="relative w-full max-w-4xl flex-1 flex items-center justify-center z-10">
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
