@@ -35,6 +35,8 @@ const TraitsConvergence = () => {
     const touchSensitivity = 0.0015; // Touch sensitivity for mobile (increased)
     let touchStartY = 0;
     let lastTouchY = 0;
+    let lastScrollY = window.scrollY;
+    let isActivelyTouching = false;
 
     // Intersection Observer to detect when section is in view
     const observer = new IntersectionObserver(
@@ -90,6 +92,7 @@ const TraitsConvergence = () => {
       const rect = section.getBoundingClientRect();
       touchStartY = e.touches[0].clientY;
       lastTouchY = e.touches[0].clientY;
+      isActivelyTouching = true;
       
       // Check if touch started within or near the section
       if (rect.top < window.innerHeight && rect.bottom > 0) {
@@ -99,6 +102,10 @@ const TraitsConvergence = () => {
           touchStartY = e.touches[0].clientY;
         }
       }
+    };
+    
+    const handleTouchEnd = () => {
+      isActivelyTouching = false;
     };
 
     const handleTouchMove = (e) => {
@@ -115,10 +122,11 @@ const TraitsConvergence = () => {
           accumulatedDelta = 0;
           progress.set(0);
           setAnimationComplete(false);
+          lastScrollY = window.scrollY;
         }
       }
       
-      if (isLocked && !animationComplete) {
+      if (isLocked && !animationComplete && isActivelyTouching) {
         e.preventDefault();
         e.stopPropagation(); // Stop event from bubbling
         
@@ -152,17 +160,59 @@ const TraitsConvergence = () => {
         }
       }
     };
+    
+    // Handle passive scroll (flick/momentum scrolling on mobile)
+    const handleScroll = () => {
+      const rect = section.getBoundingClientRect();
+      const currentScrollY = window.scrollY;
+      
+      // Check if section is in view and we should lock
+      if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
+        // User is scrolling into the section, lock it
+        setIsLocked(true);
+        accumulatedDelta = 0;
+        progress.set(0);
+        setAnimationComplete(false);
+        lastScrollY = currentScrollY;
+        return;
+      }
+      
+      // If locked and scrolling (but not actively touching), progress the animation
+      if (isLocked && !animationComplete && !isActivelyTouching) {
+        const scrollDelta = currentScrollY - lastScrollY;
+        
+        // Accumulate based on scroll movement
+        accumulatedDelta += scrollDelta * scrollSensitivity * 2; // Increased for mobile scroll
+        accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
+        
+        // Update progress
+        progress.set(accumulatedDelta);
+        
+        // Update last scroll position
+        lastScrollY = currentScrollY;
+        
+        // Check if animation is complete
+        if (accumulatedDelta >= 0.99) {
+          setAnimationComplete(true);
+          setIsLocked(false);
+        }
+      }
+    };
 
     // Add event listeners
     document.addEventListener("wheel", handleWheel, { passive: false });
     document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchend", handleTouchEnd, { passive: true });
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       observer.disconnect();
       document.removeEventListener("wheel", handleWheel);
       document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchend", handleTouchEnd);
       document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [isLocked, animationComplete, progress]);
 
