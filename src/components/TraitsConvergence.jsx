@@ -32,20 +32,32 @@ const TraitsConvergence = () => {
 
     let accumulatedDelta = 0;
     const scrollSensitivity = 0.0008; // Lower = more scrolling needed
-    const touchSensitivity = 0.003; // Touch sensitivity for mobile
+    const touchSensitivity = 0.0015; // Touch sensitivity for mobile (increased)
     let touchStartY = 0;
+    let lastTouchY = 0;
+
+    // Intersection Observer to detect when section is in view
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.5 && !isLocked && !animationComplete) {
+            // Section is more than 50% visible and we haven't started
+            const rect = section.getBoundingClientRect();
+            if (rect.top < window.innerHeight / 2 && rect.top > -100) {
+              setIsLocked(true);
+              accumulatedDelta = 0;
+              progress.set(0);
+              setAnimationComplete(false);
+            }
+          }
+        });
+      },
+      { threshold: [0.3, 0.5, 0.7] }
+    );
+
+    observer.observe(section);
 
     const handleWheel = (e) => {
-      const rect = section.getBoundingClientRect();
-
-      // Check if we're at the section
-      if (rect.top <= 100 && rect.top >= -10 && !isLocked) {
-        setIsLocked(true);
-        accumulatedDelta = 0;
-        progress.set(0);
-        setAnimationComplete(false);
-      }
-
       // If locked and animation not complete, hijack scroll
       if (isLocked && !animationComplete) {
         e.preventDefault();
@@ -66,32 +78,39 @@ const TraitsConvergence = () => {
       }
       
       // Allow scrolling backwards to reset
-      if (isLocked && e.deltaY < 0 && accumulatedDelta <= 0) {
+      if (isLocked && e.deltaY < 0 && accumulatedDelta <= 0.05) {
         setIsLocked(false);
+        setAnimationComplete(false);
+        accumulatedDelta = 0;
         progress.set(0);
       }
     };
 
     const handleTouchStart = (e) => {
-      const rect = section.getBoundingClientRect();
-      
-      // Check if we're at the section
-      if (rect.top <= 100 && rect.top >= -10 && !isLocked) {
-        setIsLocked(true);
-        accumulatedDelta = 0;
-        progress.set(0);
-        setAnimationComplete(false);
-      }
-      
       touchStartY = e.touches[0].clientY;
+      lastTouchY = e.touches[0].clientY;
     };
 
     const handleTouchMove = (e) => {
+      const rect = section.getBoundingClientRect();
+      const touchY = e.touches[0].clientY;
+      
+      // Check if we should lock (section is in view and user is swiping)
+      if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
+        const deltaFromStart = touchStartY - touchY;
+        // If user has swiped up at least 10px, lock the section
+        if (deltaFromStart > 10) {
+          setIsLocked(true);
+          accumulatedDelta = 0;
+          progress.set(0);
+          setAnimationComplete(false);
+        }
+      }
+      
       if (isLocked && !animationComplete) {
         e.preventDefault();
         
-        const touchY = e.touches[0].clientY;
-        const deltaY = touchStartY - touchY; // Positive when swiping up
+        const deltaY = lastTouchY - touchY; // Positive when swiping up
         
         // Accumulate the delta
         accumulatedDelta += deltaY * touchSensitivity;
@@ -100,8 +119,8 @@ const TraitsConvergence = () => {
         // Update progress
         progress.set(accumulatedDelta);
         
-        // Update touch start for next move
-        touchStartY = touchY;
+        // Update last touch position
+        lastTouchY = touchY;
         
         // Check if animation is complete
         if (accumulatedDelta >= 0.99) {
@@ -111,21 +130,27 @@ const TraitsConvergence = () => {
       }
       
       // Allow scrolling backwards to reset
-      if (isLocked && accumulatedDelta <= 0) {
-        setIsLocked(false);
-        progress.set(0);
+      if (isLocked && accumulatedDelta <= 0.05) {
+        const deltaY = lastTouchY - touchY;
+        if (deltaY < 0) { // Swiping down
+          setIsLocked(false);
+          setAnimationComplete(false);
+          accumulatedDelta = 0;
+          progress.set(0);
+        }
       }
     };
 
     // Add event listeners
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: false });
-    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("wheel", handleWheel, { passive: false });
+    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
+      observer.disconnect();
+      document.removeEventListener("wheel", handleWheel);
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
     };
   }, [isLocked, animationComplete, progress]);
 
@@ -154,7 +179,7 @@ const TraitsConvergence = () => {
     <section
       ref={sectionRef}
       id="traits"
-      className="hidden md:flex relative flex-col items-center justify-start border-b border-neutral-900 pb-24 pt-20 px-4 sm:px-8 md:px-16"
+      className="relative flex flex-col items-center justify-start border-b border-neutral-900 pb-24 pt-20 px-4 sm:px-8 md:px-16"
     >
       {/* Title */}
       <motion.h2
