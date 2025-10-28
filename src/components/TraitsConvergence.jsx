@@ -14,13 +14,13 @@ const TraitsConvergence = () => {
   
   // Transform progress into circle positions
   const circle1X = useTransform(progress, [0, 0.6], [0, 0]);
-  const circle1Y = useTransform(progress, [0, 0.6], [-180, 0]);
+  const circle1Y = useTransform(progress, [0, 0.6], [-100, 0]); // Reduced from -180 to give more space from heading
   
   const circle2X = useTransform(progress, [0, 0.6], [-220, 0]);
-  const circle2Y = useTransform(progress, [0, 0.6], [140, 0]);
+  const circle2Y = useTransform(progress, [0, 0.6], [180, 0]); // Increased from 140 to balance
   
   const circle3X = useTransform(progress, [0, 0.6], [220, 0]);
-  const circle3Y = useTransform(progress, [0, 0.6], [140, 0]);
+  const circle3Y = useTransform(progress, [0, 0.6], [180, 0]); // Increased from 140 to balance
   
   const traitsOpacity = useTransform(progress, [0.4, 0.6], [1, 0]);
   const mergedOpacity = useTransform(progress, [0.6, 0.9], [0, 1]);
@@ -32,10 +32,11 @@ const TraitsConvergence = () => {
 
     let accumulatedDelta = 0;
     const scrollSensitivity = 0.0008; // Lower = more scrolling needed
+    const touchSensitivity = 0.003; // Touch sensitivity for mobile
+    let touchStartY = 0;
 
     const handleWheel = (e) => {
       const rect = section.getBoundingClientRect();
-      const inView = rect.top <= 0 && rect.bottom >= window.innerHeight;
 
       // Check if we're at the section
       if (rect.top <= 100 && rect.top >= -10 && !isLocked) {
@@ -71,11 +72,60 @@ const TraitsConvergence = () => {
       }
     };
 
-    // Add wheel event listener with passive: false to allow preventDefault
+    const handleTouchStart = (e) => {
+      const rect = section.getBoundingClientRect();
+      
+      // Check if we're at the section
+      if (rect.top <= 100 && rect.top >= -10 && !isLocked) {
+        setIsLocked(true);
+        accumulatedDelta = 0;
+        progress.set(0);
+        setAnimationComplete(false);
+      }
+      
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (isLocked && !animationComplete) {
+        e.preventDefault();
+        
+        const touchY = e.touches[0].clientY;
+        const deltaY = touchStartY - touchY; // Positive when swiping up
+        
+        // Accumulate the delta
+        accumulatedDelta += deltaY * touchSensitivity;
+        accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
+        
+        // Update progress
+        progress.set(accumulatedDelta);
+        
+        // Update touch start for next move
+        touchStartY = touchY;
+        
+        // Check if animation is complete
+        if (accumulatedDelta >= 0.99) {
+          setAnimationComplete(true);
+          setIsLocked(false);
+        }
+      }
+      
+      // Allow scrolling backwards to reset
+      if (isLocked && accumulatedDelta <= 0) {
+        setIsLocked(false);
+        progress.set(0);
+      }
+    };
+
+    // Add event listeners
     window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: false });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
     };
   }, [isLocked, animationComplete, progress]);
 
@@ -118,7 +168,7 @@ const TraitsConvergence = () => {
       </motion.h2>
 
       {/* Central container for circles */}
-      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[500px] sm:h-[600px]">
+      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[450px] sm:h-[550px]">
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
