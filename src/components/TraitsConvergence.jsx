@@ -87,8 +87,18 @@ const TraitsConvergence = () => {
     };
 
     const handleTouchStart = (e) => {
+      const rect = section.getBoundingClientRect();
       touchStartY = e.touches[0].clientY;
       lastTouchY = e.touches[0].clientY;
+      
+      // Check if touch started within or near the section
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        // Section is visible, prepare for potential lock
+        if (rect.top < window.innerHeight / 2 && rect.top > -100 && !isLocked && !animationComplete) {
+          // Store that we're in the active zone
+          touchStartY = e.touches[0].clientY;
+        }
+      }
     };
 
     const handleTouchMove = (e) => {
@@ -100,6 +110,7 @@ const TraitsConvergence = () => {
         const deltaFromStart = touchStartY - touchY;
         // If user has swiped up at least 10px, lock the section
         if (deltaFromStart > 10) {
+          e.preventDefault(); // Prevent immediately
           setIsLocked(true);
           accumulatedDelta = 0;
           progress.set(0);
@@ -109,6 +120,7 @@ const TraitsConvergence = () => {
       
       if (isLocked && !animationComplete) {
         e.preventDefault();
+        e.stopPropagation(); // Stop event from bubbling
         
         const deltaY = lastTouchY - touchY; // Positive when swiping up
         
@@ -180,6 +192,7 @@ const TraitsConvergence = () => {
       ref={sectionRef}
       id="traits"
       className="relative flex flex-col items-center justify-start border-b border-neutral-900 pb-24 pt-20 px-4 sm:px-8 md:px-16"
+      style={{ touchAction: isLocked ? 'none' : 'auto' }}
     >
       {/* Title */}
       <motion.h2
@@ -193,7 +206,7 @@ const TraitsConvergence = () => {
       </motion.h2>
 
       {/* Central container for circles */}
-      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[450px] sm:h-[550px]">
+      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[450px] sm:h-[550px]" style={{ pointerEvents: 'none' }}>
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
@@ -201,12 +214,13 @@ const TraitsConvergence = () => {
             style={{
               x: trait.x,
               y: trait.y,
+              pointerEvents: 'none'
             }}
             className="absolute"
           >
             {/* Circle with gradient border */}
             <motion.div
-              style={{ opacity: traitsOpacity }}
+              style={{ opacity: traitsOpacity, pointerEvents: 'none' }}
               className={`relative w-44 h-44 sm:w-56 sm:h-56 rounded-full bg-gradient-to-br ${trait.gradient} p-1 shadow-lg`}
             >
               {/* Inner circle */}
@@ -224,6 +238,7 @@ const TraitsConvergence = () => {
           style={{
             opacity: mergedOpacity,
             scale: mergedScale,
+            pointerEvents: 'none'
           }}
           className="absolute"
         >
