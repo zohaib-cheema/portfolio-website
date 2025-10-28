@@ -15,27 +15,28 @@ const TraitsConvergence = () => {
   // Transform scroll progress into movement values
   // Each circle moves from its initial position to center (0, 0)
   // Animation progresses as user scrolls through this locked section
+  // Spread out animation across the full scroll distance
   
   // Top circle (Collaborative Leader) - starts top center, further away
-  const circle1X = useTransform(scrollYProgress, [0, 0.6], [0, 0]);
-  const circle1Y = useTransform(scrollYProgress, [0, 0.6], [-180, 0]);
+  const circle1X = useTransform(scrollYProgress, [0.1, 0.7], [0, 0]);
+  const circle1Y = useTransform(scrollYProgress, [0.1, 0.7], [-180, 0]);
   
   // Bottom left circle (Continuous Learner) - starts bottom left
-  const circle2X = useTransform(scrollYProgress, [0, 0.6], [-220, 0]);
-  const circle2Y = useTransform(scrollYProgress, [0, 0.6], [140, 0]);
+  const circle2X = useTransform(scrollYProgress, [0.1, 0.7], [-220, 0]);
+  const circle2Y = useTransform(scrollYProgress, [0.1, 0.7], [140, 0]);
   
   // Bottom right circle (Problem Solver) - starts bottom right
-  const circle3X = useTransform(scrollYProgress, [0, 0.6], [220, 0]);
-  const circle3Y = useTransform(scrollYProgress, [0, 0.6], [140, 0]);
+  const circle3X = useTransform(scrollYProgress, [0.1, 0.7], [220, 0]);
+  const circle3Y = useTransform(scrollYProgress, [0.1, 0.7], [140, 0]);
   
   // Opacity for trait text (fade out as circles merge)
-  const traitsOpacity = useTransform(scrollYProgress, [0.4, 0.6], [1, 0]);
+  const traitsOpacity = useTransform(scrollYProgress, [0.5, 0.7], [1, 0]);
   
   // Opacity for merged content (fade in after merge)
-  const mergedOpacity = useTransform(scrollYProgress, [0.6, 0.9], [0, 1]);
+  const mergedOpacity = useTransform(scrollYProgress, [0.7, 0.95], [0, 1]);
   
   // Scale for merged circle
-  const mergedScale = useTransform(scrollYProgress, [0.6, 0.9], [0.8, 1]);
+  const mergedScale = useTransform(scrollYProgress, [0.7, 0.95], [0.8, 1]);
 
   const traits = [
     { 
@@ -61,10 +62,10 @@ const TraitsConvergence = () => {
   return (
     <section
       ref={containerRef}
-      className="relative h-[300vh] border-b border-neutral-900"
+      className="relative h-[400vh] border-b border-neutral-900"
     >
       {/* Sticky container that holds position while animation plays */}
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-start px-4 overflow-hidden pt-16">
+      <div className="sticky top-0 left-0 h-screen w-full flex flex-col items-center justify-start px-4 overflow-hidden pt-16">
         {/* Title - Higher z-index to stay above circles */}
         <motion.h2
           initial={{ opacity: 0, y: -50 }}
