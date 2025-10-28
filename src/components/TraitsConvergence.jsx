@@ -32,10 +32,11 @@ const TraitsConvergence = () => {
 
     let accumulatedDelta = 0;
     const scrollSensitivity = 0.0008; // Lower = more scrolling needed
-    const touchSensitivity = 0.0015; // Touch sensitivity for mobile (increased)
+    const touchSensitivity = 0.001; // Touch sensitivity for mobile (reduced for slower animation)
     let touchStartY = 0;
     let lastTouchY = 0;
     let lastScrollY = window.scrollY;
+    let lockedScrollY = 0;
     let isActivelyTouching = false;
 
     // Intersection Observer to detect when section is in view
@@ -122,6 +123,7 @@ const TraitsConvergence = () => {
           accumulatedDelta = 0;
           progress.set(0);
           setAnimationComplete(false);
+          lockedScrollY = window.scrollY;
           lastScrollY = window.scrollY;
         }
       }
@@ -132,7 +134,7 @@ const TraitsConvergence = () => {
         
         const deltaY = lastTouchY - touchY; // Positive when swiping up
         
-        // Accumulate the delta
+        // Accumulate the delta (reduced sensitivity)
         accumulatedDelta += deltaY * touchSensitivity;
         accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
         
@@ -141,6 +143,9 @@ const TraitsConvergence = () => {
         
         // Update last touch position
         lastTouchY = touchY;
+        
+        // Also keep scroll locked during active touch
+        window.scrollTo(0, lockedScrollY);
         
         // Check if animation is complete
         if (accumulatedDelta >= 0.99) {
@@ -173,29 +178,38 @@ const TraitsConvergence = () => {
         accumulatedDelta = 0;
         progress.set(0);
         setAnimationComplete(false);
+        lockedScrollY = currentScrollY; // Store the scroll position when we lock
         lastScrollY = currentScrollY;
         return;
       }
       
-      // If locked and scrolling (but not actively touching), progress the animation
-      if (isLocked && !animationComplete && !isActivelyTouching) {
+      // If locked, force scroll position to stay locked and progress animation instead
+      if (isLocked && !animationComplete) {
         const scrollDelta = currentScrollY - lastScrollY;
         
-        // Accumulate based on scroll movement
-        accumulatedDelta += scrollDelta * scrollSensitivity * 2; // Increased for mobile scroll
+        // Restore scroll position to locked position (hijack the scroll)
+        window.scrollTo(0, lockedScrollY);
+        
+        // But use the scroll attempt to progress the animation
+        accumulatedDelta += Math.abs(scrollDelta) * scrollSensitivity * 1.2; // Reduced multiplier for slower animation
         accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
         
         // Update progress
         progress.set(accumulatedDelta);
         
         // Update last scroll position
-        lastScrollY = currentScrollY;
+        lastScrollY = lockedScrollY; // Keep it locked
         
         // Check if animation is complete
         if (accumulatedDelta >= 0.99) {
           setAnimationComplete(true);
           setIsLocked(false);
         }
+      }
+      
+      // Update lastScrollY when not locked for next time
+      if (!isLocked) {
+        lastScrollY = currentScrollY;
       }
     };
 
