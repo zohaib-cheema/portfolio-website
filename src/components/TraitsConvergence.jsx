@@ -1,42 +1,83 @@
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
-import profileImg from "../assets/about.jpg"; // Using your existing photo
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { useRef, useEffect, useState } from "react";
+import profileImg from "../assets/about.jpg";
 
 const TraitsConvergence = () => {
-  const containerRef = useRef(null);
+  const sectionRef = useRef(null);
+  const [isLocked, setIsLocked] = useState(false);
   
-  // Track scroll progress through this section
-  // Animation only happens when section is in view and fills the viewport
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"], // Lock when section reaches top of viewport
-  });
+  // Motion value to track animation progress (0 to 1)
+  const progress = useMotionValue(0);
+  
+  // Track if animation is complete
+  const [animationComplete, setAnimationComplete] = useState(false);
+  
+  // Transform progress into circle positions
+  const circle1X = useTransform(progress, [0, 0.6], [0, 0]);
+  const circle1Y = useTransform(progress, [0, 0.6], [-180, 0]);
+  
+  const circle2X = useTransform(progress, [0, 0.6], [-220, 0]);
+  const circle2Y = useTransform(progress, [0, 0.6], [140, 0]);
+  
+  const circle3X = useTransform(progress, [0, 0.6], [220, 0]);
+  const circle3Y = useTransform(progress, [0, 0.6], [140, 0]);
+  
+  const traitsOpacity = useTransform(progress, [0.4, 0.6], [1, 0]);
+  const mergedOpacity = useTransform(progress, [0.6, 0.9], [0, 1]);
+  const mergedScale = useTransform(progress, [0.6, 0.9], [0.8, 1]);
 
-  // Transform scroll progress into movement values
-  // Each circle moves from its initial position to center (0, 0)
-  // Animation progresses as user scrolls through this locked section
-  // Spread out animation across the full scroll distance
-  
-  // Top circle (Collaborative Leader) - starts top center, further away
-  const circle1X = useTransform(scrollYProgress, [0.1, 0.7], [0, 0]);
-  const circle1Y = useTransform(scrollYProgress, [0.1, 0.7], [-180, 0]);
-  
-  // Bottom left circle (Continuous Learner) - starts bottom left
-  const circle2X = useTransform(scrollYProgress, [0.1, 0.7], [-220, 0]);
-  const circle2Y = useTransform(scrollYProgress, [0.1, 0.7], [140, 0]);
-  
-  // Bottom right circle (Problem Solver) - starts bottom right
-  const circle3X = useTransform(scrollYProgress, [0.1, 0.7], [220, 0]);
-  const circle3Y = useTransform(scrollYProgress, [0.1, 0.7], [140, 0]);
-  
-  // Opacity for trait text (fade out as circles merge)
-  const traitsOpacity = useTransform(scrollYProgress, [0.5, 0.7], [1, 0]);
-  
-  // Opacity for merged content (fade in after merge)
-  const mergedOpacity = useTransform(scrollYProgress, [0.7, 0.95], [0, 1]);
-  
-  // Scale for merged circle
-  const mergedScale = useTransform(scrollYProgress, [0.7, 0.95], [0.8, 1]);
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let accumulatedDelta = 0;
+    const scrollSensitivity = 0.0008; // Lower = more scrolling needed
+
+    const handleWheel = (e) => {
+      const rect = section.getBoundingClientRect();
+      const inView = rect.top <= 0 && rect.bottom >= window.innerHeight;
+
+      // Check if we're at the section
+      if (rect.top <= 100 && rect.top >= -10 && !isLocked) {
+        setIsLocked(true);
+        accumulatedDelta = 0;
+        progress.set(0);
+        setAnimationComplete(false);
+      }
+
+      // If locked and animation not complete, hijack scroll
+      if (isLocked && !animationComplete) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Accumulate scroll delta
+        accumulatedDelta += e.deltaY * scrollSensitivity;
+        accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
+
+        // Update progress
+        progress.set(accumulatedDelta);
+
+        // Check if animation is complete
+        if (accumulatedDelta >= 0.99) {
+          setAnimationComplete(true);
+          setIsLocked(false);
+        }
+      }
+      
+      // Allow scrolling backwards to reset
+      if (isLocked && e.deltaY < 0 && accumulatedDelta <= 0) {
+        setIsLocked(false);
+        progress.set(0);
+      }
+    };
+
+    // Add wheel event listener with passive: false to allow preventDefault
+    window.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, [isLocked, animationComplete, progress]);
 
   const traits = [
     { 
@@ -61,24 +102,23 @@ const TraitsConvergence = () => {
 
   return (
     <section
-      ref={containerRef}
-      className="relative h-[400vh] border-b border-neutral-900"
+      ref={sectionRef}
+      id="traits"
+      className="relative min-h-screen flex flex-col items-center justify-start px-4 py-20 border-b border-neutral-900"
     >
-      {/* Sticky container that holds position while animation plays */}
-      <div className="sticky top-0 left-0 h-screen w-full flex flex-col items-center justify-start px-4 overflow-hidden pt-16">
-        {/* Title - Higher z-index to stay above circles */}
-        <motion.h2
-          initial={{ opacity: 0, y: -50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="relative z-20 mb-8 w-full text-center text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent px-4"
-        >
-          What Drives Me
-        </motion.h2>
+      {/* Title */}
+      <motion.h2
+        initial={{ opacity: 0, y: -50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="relative z-20 mb-12 w-full text-center text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent px-4"
+      >
+        What Drives Me
+      </motion.h2>
 
-        {/* Central container for circles - positioned below heading */}
-        <div className="relative w-full max-w-4xl flex-1 flex items-center justify-center z-10">
+      {/* Central container for circles */}
+      <div className="relative w-full max-w-4xl flex-1 flex items-center justify-center z-10 min-h-[500px]">
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
@@ -137,11 +177,21 @@ const TraitsConvergence = () => {
             </p>
           </motion.div>
         </motion.div>
-        </div>
       </div>
+
+      {/* Scroll hint - only show when locked */}
+      {isLocked && !animationComplete && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute bottom-8 text-neutral-500 text-sm"
+        >
+          Keep scrolling...
+        </motion.div>
+      )}
     </section>
   );
 };
 
 export default TraitsConvergence;
-
