@@ -35,6 +35,8 @@ const TraitsConvergence = () => {
     const touchSensitivity = 0.0015; // Touch sensitivity for mobile (increased)
     let touchStartY = 0;
     let lastTouchY = 0;
+    let lastScrollY = window.pageYOffset;
+    let momentumScrollRAF = null;
 
     // Intersection Observer to detect when section is in view
     const observer = new IntersectionObserver(
@@ -153,16 +155,78 @@ const TraitsConvergence = () => {
       }
     };
 
+    // Handle momentum/flick scrolling on mobile
+    const handleMomentumScroll = () => {
+      if (!isLocked || animationComplete) {
+        lastScrollY = window.pageYOffset;
+        return;
+      }
+
+      const currentScrollY = window.pageYOffset;
+      const scrollDelta = currentScrollY - lastScrollY;
+
+      if (Math.abs(scrollDelta) > 0) {
+        // Scrolling is happening (momentum or active)
+        // Progress the animation based on scroll delta
+        accumulatedDelta += Math.abs(scrollDelta) * scrollSensitivity * 2;
+        accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
+        
+        progress.set(accumulatedDelta);
+
+        // Check if animation is complete
+        if (accumulatedDelta >= 0.99) {
+          setAnimationComplete(true);
+          setIsLocked(false);
+        }
+
+        // Keep trying to lock scroll position (for momentum)
+        if (isLocked && !animationComplete) {
+          window.scrollTo(0, lastScrollY);
+        }
+      }
+
+      lastScrollY = window.pageYOffset;
+
+      // Continue checking on next frame
+      if (isLocked && !animationComplete) {
+        momentumScrollRAF = requestAnimationFrame(handleMomentumScroll);
+      }
+    };
+
+    const handleScroll = () => {
+      const rect = section.getBoundingClientRect();
+      
+      // Start momentum tracking when locked
+      if (isLocked && !animationComplete && !momentumScrollRAF) {
+        momentumScrollRAF = requestAnimationFrame(handleMomentumScroll);
+      }
+      
+      // Check if we should auto-lock when scrolling into view
+      if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
+        setIsLocked(true);
+        accumulatedDelta = 0;
+        progress.set(0);
+        setAnimationComplete(false);
+        lastScrollY = window.pageYOffset;
+        momentumScrollRAF = requestAnimationFrame(handleMomentumScroll);
+      }
+    };
+
     // Add event listeners
     document.addEventListener("wheel", handleWheel, { passive: false });
     document.addEventListener("touchstart", handleTouchStart, { passive: true });
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       observer.disconnect();
+      if (momentumScrollRAF) {
+        cancelAnimationFrame(momentumScrollRAF);
+      }
       document.removeEventListener("wheel", handleWheel);
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [isLocked, animationComplete, progress]);
 
