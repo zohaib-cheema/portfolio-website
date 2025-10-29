@@ -24,16 +24,25 @@ const Navbar = () => {
     // Intersection Observer to track visible section
     const observerOptions = {
       root: null,
-      rootMargin: "0px",
-      threshold: [0.1, 0.3, 0.5, 0.7, 0.9],
+      rootMargin: "-20% 0px -20% 0px", // Only trigger when section is in middle 60% of viewport
+      threshold: 0.5,
     };
 
     const observerCallback = (entries) => {
+      // Find the section with the highest intersection ratio
+      let mostVisible = null;
+      let highestRatio = 0;
+
       entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
-          setActive(entry.target.id);
+        if (entry.isIntersecting && entry.intersectionRatio > highestRatio) {
+          highestRatio = entry.intersectionRatio;
+          mostVisible = entry.target.id;
         }
       });
+
+      if (mostVisible) {
+        setActive(mostVisible);
+      }
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
