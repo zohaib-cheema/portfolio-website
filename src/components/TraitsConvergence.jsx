@@ -321,7 +321,7 @@ const TraitsConvergence = () => {
       </motion.h2>
 
       {/* Central container for circles */}
-      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[320px] sm:h-[550px]" style={{ pointerEvents: 'none' }}>
+      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[500px] sm:h-[650px]" style={{ pointerEvents: 'none' }}>
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
@@ -381,6 +381,29 @@ const TraitsConvergence = () => {
               Full-Stack Engineer & Technical Leader
             </p>
           </motion.div>
+        </motion.div>
+
+        {/* About Text Box - appears when profile picture fades in */}
+        <motion.div
+          style={{ opacity: mergedOpacity }}
+          className="absolute -bottom-32 sm:-bottom-40 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4"
+        >
+          <div className="mx-auto bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-4 sm:p-6 rounded-3xl shadow-lg">
+            <div className="text-neutral-200 text-sm sm:text-base md:text-lg space-y-3 sm:space-y-4">
+              <p>
+                Hey there! I'm Zohaib (Zo-hey-b), a Computer Science and Math student who loves building things that actually help people.
+              </p>
+              <p>
+                Quick story: At my college orientation, one of the professors said something that stuck with me: "For the next four years, say 'Yes, and' to every challenge. The 'and' is how you'll 🫵 add value." That became my mindset. Whether it was leading 5+ student clubs, interning at Uber, planning 20+ events, or budgeting for various student orgs, I've always looked for the "and."
+              </p>
+              <p>
+                I've spent 180+ hours teaching coding to students and underserved communities because I believe tech should be for everyone. I've built 50+ technical projects (from web/mobile apps to analytical dashboards) that have helped solve real-world problems. And when I'm not deep in code, I'm either dancing or choreographing a dance performance 🕺. It's my favorite creative outlet.
+              </p>
+              <p>
+                If anything here sparks a convo, I'd love to hear from you! Reach out anytime at <span className="underline">zohaib.s.cheema9@gmail.com</span> 🙂
+              </p>
+            </div>
+          </div>
         </motion.div>
       </div>
 
