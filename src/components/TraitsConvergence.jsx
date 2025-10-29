@@ -131,11 +131,11 @@ const TraitsConvergence = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // MOBILE: Start when section is mostly visible
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.7 && !isLocked && !animationComplete) {
+          // MOBILE: Start when section is 50% visible
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !isLocked && !animationComplete) {
             const rect = section.getBoundingClientRect();
-            // MOBILE: Check if section is mostly visible (more than 70% in viewport)
-            if (rect.top < window.innerHeight * 0.3 && rect.bottom > window.innerHeight * 0.7) {
+            // MOBILE: Check if section is 50% visible (more than 50% in viewport)
+            if (rect.top < window.innerHeight * 0.5 && rect.bottom > window.innerHeight * 0.5) {
               setIsLocked(true);
               accumulatedDelta = 0;
               progress.set(0);
@@ -146,7 +146,7 @@ const TraitsConvergence = () => {
           }
         });
       },
-      { threshold: [0.5, 0.7, 0.9] } // MOBILE: More lenient thresholds
+      { threshold: [0.3, 0.5, 0.7] } // MOBILE: Even more lenient thresholds
     );
 
     observer.observe(section);
