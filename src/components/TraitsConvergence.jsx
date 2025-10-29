@@ -359,13 +359,21 @@ const TraitsConvergence = () => {
         >
           {/* Large merged circle */}
           <div className="relative w-48 h-48 sm:w-80 sm:h-80 rounded-full bg-gradient-to-br from-pink-300 via-slate-500 to-purple-500 p-1.5 shadow-2xl">
-            {/* Inner circle with image */}
-            <div className="w-full h-full rounded-full overflow-hidden border-4 border-neutral-950">
+            {/* Inner circle with image and Linktree hover */}
+            <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-neutral-950 group">
               <img
                 src={profileImg}
                 alt="Zohaib Cheema"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
+              <a
+                href="https://linktr.ee/zohaib_cheema"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-base sm:text-lg font-semibold"
+              >
+                Visit My Linktree
+              </a>
             </div>
           </div>
           
