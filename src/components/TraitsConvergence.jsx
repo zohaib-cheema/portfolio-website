@@ -127,22 +127,26 @@ const TraitsConvergence = () => {
     let lastScrollY = window.scrollY;
     let isFlickScrolling = false;
 
-    // Intersection Observer to detect when section is in view
+    // Intersection Observer to detect when section is FULLY visible
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio > 0.5 && !isLocked && !animationComplete) {
+          // MOBILE: Only start when section is FULLY visible (100% in viewport)
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.95 && !isLocked && !animationComplete) {
             const rect = section.getBoundingClientRect();
-            if (rect.top < window.innerHeight / 2 && rect.top > -100) {
+            // MOBILE: Check if entire section is visible (top >= 0 and bottom <= window height)
+            if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
               setIsLocked(true);
               accumulatedDelta = 0;
               progress.set(0);
               setAnimationComplete(false);
+              isFlickScrolling = true;
+              lastScrollY = window.scrollY;
             }
           }
         });
       },
-      { threshold: [0.3, 0.5, 0.7] }
+      { threshold: [0.9, 0.95, 1.0] } // MOBILE: Higher thresholds for full visibility
     );
 
     observer.observe(section);
@@ -152,9 +156,11 @@ const TraitsConvergence = () => {
       touchStartY = e.touches[0].clientY;
       lastTouchY = e.touches[0].clientY;
       
-      // MOBILE: Check if touch started within or near the section
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        if (rect.top < window.innerHeight / 2 && rect.top > -100 && !isLocked && !animationComplete) {
+      // MOBILE: Check if entire section is fully visible
+      if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+        // Section is fully visible, prepare for potential lock
+        if (!isLocked && !animationComplete) {
+          // Store that we're in the active zone
           touchStartY = e.touches[0].clientY;
         }
       }
@@ -164,8 +170,8 @@ const TraitsConvergence = () => {
       const rect = section.getBoundingClientRect();
       const touchY = e.touches[0].clientY;
       
-      // MOBILE: Check if we should lock (section is in view and user is swiping)
-      if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
+      // MOBILE: Check if we should lock (entire section is fully visible and user is swiping)
+      if (!isLocked && !animationComplete && rect.top >= 0 && rect.bottom <= window.innerHeight) {
         const deltaFromStart = touchStartY - touchY;
         // MOBILE: If user has swiped up threshold amount, lock the section
         if (deltaFromStart > MOBILE_SWIPE_THRESHOLD) {
@@ -222,9 +228,9 @@ const TraitsConvergence = () => {
       const rect = section.getBoundingClientRect();
       const currentScrollY = window.scrollY;
       
-      // MOBILE: Check if section is in view and we should lock
-      if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
-        // User is scrolling into the section, lock it
+      // MOBILE: Check if entire section is fully visible and we should lock
+      if (!isLocked && !animationComplete && rect.top >= 0 && rect.bottom <= window.innerHeight) {
+        // User has scrolled to show entire section, lock it
         setIsLocked(true);
         accumulatedDelta = 0;
         progress.set(0);
