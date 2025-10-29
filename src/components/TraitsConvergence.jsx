@@ -386,7 +386,7 @@ const TraitsConvergence = () => {
         {/* About Text Box - appears when profile picture fades in */}
         <motion.div
           style={{ opacity: mergedOpacity }}
-          className="absolute -bottom-32 sm:-bottom-40 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4"
+          className="absolute top-full mt-8 sm:mt-12 left-1/2 -translate-x-1/2 w-full max-w-4xl px-4"
         >
           <div className="mx-auto bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-4 sm:p-6 rounded-3xl shadow-lg">
             <div className="text-neutral-200 text-sm sm:text-base md:text-lg space-y-3 sm:space-y-4">
