@@ -8,7 +8,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { title: "About Me", id: "about" },
+    { title: "About Me", id: "traits" },
     { title: "Work", id: "experience" },
     { title: "Leadership", id: "leadership" },
     { title: "Projects", id: "projects" },
