@@ -341,7 +341,7 @@ const TraitsConvergence = () => {
           {/* Name below the circle */}
           <motion.div
             style={{ opacity: mergedOpacity }}
-            className="absolute -bottom-12 sm:-bottom-20 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
+            className="absolute -bottom-16 sm:-bottom-20 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
           >
             <h2 className="text-lg sm:text-4xl font-bold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
               Zohaib Cheema
