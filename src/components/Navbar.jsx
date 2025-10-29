@@ -25,12 +25,12 @@ const Navbar = () => {
     const observerOptions = {
       root: null,
       rootMargin: "0px",
-      threshold: 0.6,
+      threshold: [0.1, 0.3, 0.5, 0.7, 0.9],
     };
 
     const observerCallback = (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
           setActive(entry.target.id);
         }
       });
