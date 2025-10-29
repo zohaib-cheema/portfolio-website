@@ -109,7 +109,7 @@ const TraitsConvergence = () => {
   }, [isLocked, animationComplete, progress, isMobile]);
 
   // ==========================================
-  // MOBILE TOUCH HANDLING (Touch Events)
+  // MOBILE TOUCH HANDLING (Touch Events + Flick Scroll)
   // ==========================================
   useEffect(() => {
     if (!isMobile) return; // Skip mobile logic on desktop
@@ -119,10 +119,13 @@ const TraitsConvergence = () => {
 
     let accumulatedDelta = 0;
     const MOBILE_TOUCH_SENSITIVITY = 0.0015; // MOBILE: Touch sensitivity
+    const MOBILE_SCROLL_SENSITIVITY = 0.0006; // MOBILE: Flick scroll sensitivity
     const MOBILE_SWIPE_THRESHOLD = 10; // MOBILE: Min pixels to swipe before locking
     const MOBILE_RESET_THRESHOLD = 0.05; // MOBILE: Threshold for resetting animation
     let touchStartY = 0;
     let lastTouchY = 0;
+    let lastScrollY = window.scrollY;
+    let isFlickScrolling = false;
 
     // Intersection Observer to detect when section is in view
     const observer = new IntersectionObserver(
@@ -210,14 +213,56 @@ const TraitsConvergence = () => {
       }
     };
 
-    // MOBILE: Add touch event listeners only
+    // MOBILE: Handle flick/momentum scrolling
+    const handleScroll = () => {
+      const rect = section.getBoundingClientRect();
+      const currentScrollY = window.scrollY;
+      
+      // MOBILE: Check if section is in view and we should lock
+      if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
+        // User is flick scrolling into the section, lock it
+        setIsLocked(true);
+        accumulatedDelta = 0;
+        progress.set(0);
+        setAnimationComplete(false);
+        isFlickScrolling = true;
+        lastScrollY = currentScrollY;
+        return;
+      }
+      
+      // MOBILE: If locked and flick scrolling, progress animation instead of scrolling
+      if (isLocked && !animationComplete && isFlickScrolling) {
+        const scrollDelta = currentScrollY - lastScrollY;
+        
+        // MOBILE: Use scroll delta to progress animation
+        accumulatedDelta += Math.abs(scrollDelta) * MOBILE_SCROLL_SENSITIVITY;
+        accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
+        
+        // Update progress
+        progress.set(accumulatedDelta);
+        
+        // MOBILE: Check if animation is complete
+        if (accumulatedDelta >= 0.99) {
+          setAnimationComplete(true);
+          setIsLocked(false);
+          isFlickScrolling = false;
+        }
+      }
+      
+      // MOBILE: Update last scroll position
+      lastScrollY = currentScrollY;
+    };
+
+    // MOBILE: Add touch event listeners + scroll listener for flick scrolling
     document.addEventListener("touchstart", handleTouchStart, { passive: true });
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       observer.disconnect();
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [isLocked, animationComplete, progress, isMobile]);
 
