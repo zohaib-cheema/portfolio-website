@@ -321,7 +321,7 @@ const TraitsConvergence = () => {
       </motion.h2>
 
       {/* Central container for circles */}
-      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[500px] sm:h-[650px]" style={{ pointerEvents: 'none' }}>
+      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[320px] sm:h-[550px]" style={{ pointerEvents: 'none' }}>
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
