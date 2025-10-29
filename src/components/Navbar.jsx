@@ -24,8 +24,8 @@ const Navbar = () => {
     // Intersection Observer to track visible section
     const observerOptions = {
       root: null,
-      rootMargin: "-20% 0px -20% 0px", // Only trigger when section is in middle 60% of viewport
-      threshold: 0.5,
+      rootMargin: "0px",
+      threshold: [0.1, 0.3, 0.5, 0.7],
     };
 
     const observerCallback = (entries) => {
@@ -40,7 +40,7 @@ const Navbar = () => {
         }
       });
 
-      if (mostVisible) {
+      if (mostVisible && highestRatio > 0.1) {
         setActive(mostVisible);
       }
     };
