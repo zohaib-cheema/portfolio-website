@@ -352,8 +352,7 @@ const TraitsConvergence = () => {
         <motion.div
           style={{
             opacity: mergedOpacity,
-            scale: mergedScale,
-            pointerEvents: 'none'
+            scale: mergedScale
           }}
           className="absolute"
         >
