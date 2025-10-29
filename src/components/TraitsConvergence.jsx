@@ -306,7 +306,7 @@ const TraitsConvergence = () => {
     <section
       ref={sectionRef}
       id="traits"
-      className="relative flex flex-col items-center justify-start border-b border-neutral-900 pb-24 pt-20 px-4 sm:px-8 md:px-16"
+      className="relative flex flex-col items-center justify-start border-b border-neutral-900 pb-32 pt-20 px-4 sm:px-8 md:px-16"
       style={{ touchAction: isLocked ? 'none' : 'auto' }}
     >
       {/* Title */}
@@ -321,7 +321,7 @@ const TraitsConvergence = () => {
       </motion.h2>
 
       {/* Central container for circles */}
-      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[320px] sm:h-[550px]" style={{ pointerEvents: 'none' }}>
+      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[320px] sm:h-[400px]" style={{ pointerEvents: 'none' }}>
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
@@ -388,7 +388,7 @@ const TraitsConvergence = () => {
       {/* About Text Box - appears when profile picture fades in */}
       <motion.div
         style={{ opacity: mergedOpacity }}
-        className="mt-8 sm:mt-12 w-full max-w-4xl mx-auto px-4"
+        className="mt-6 sm:mt-8 w-full max-w-4xl mx-auto px-4"
       >
         <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-4 sm:p-6 rounded-3xl shadow-lg">
           <div className="text-neutral-200 text-sm sm:text-base md:text-lg space-y-3 sm:space-y-4">
