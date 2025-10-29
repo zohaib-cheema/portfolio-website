@@ -25,13 +25,13 @@ const TraitsConvergence = () => {
   
   // Transform progress into circle positions
   const circle1X = useTransform(progress, [0, 0.6], [0, 0]);
-  const circle1Y = useTransform(progress, [0, 0.6], [-80, 0]); // Reduced further for mobile
+  const circle1Y = useTransform(progress, [0, 0.6], [-60, 0]); // Even closer for mobile
   
-  const circle2X = useTransform(progress, [0, 0.6], [-180, 0]); // Reduced horizontal spread for mobile
-  const circle2Y = useTransform(progress, [0, 0.6], [120, 0]); // Reduced vertical distance for mobile
+  const circle2X = useTransform(progress, [0, 0.6], [-140, 0]); // Much smaller horizontal spread for mobile
+  const circle2Y = useTransform(progress, [0, 0.6], [80, 0]); // Much closer vertical distance for mobile
   
-  const circle3X = useTransform(progress, [0, 0.6], [180, 0]); // Reduced horizontal spread for mobile
-  const circle3Y = useTransform(progress, [0, 0.6], [120, 0]); // Reduced vertical distance for mobile
+  const circle3X = useTransform(progress, [0, 0.6], [140, 0]); // Much smaller horizontal spread for mobile
+  const circle3Y = useTransform(progress, [0, 0.6], [80, 0]); // Much closer vertical distance for mobile
   
   const traitsOpacity = useTransform(progress, [0.4, 0.6], [1, 0]);
   const mergedOpacity = useTransform(progress, [0.6, 0.9], [0, 1]);
@@ -321,7 +321,7 @@ const TraitsConvergence = () => {
       </motion.h2>
 
       {/* Central container for circles */}
-      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[400px] sm:h-[550px]" style={{ pointerEvents: 'none' }}>
+      <div className="relative w-full max-w-4xl flex items-center justify-center z-10 h-[320px] sm:h-[550px]" style={{ pointerEvents: 'none' }}>
         {/* Individual trait circles */}
         {traits.map((trait, index) => (
           <motion.div
@@ -336,11 +336,11 @@ const TraitsConvergence = () => {
             {/* Circle with gradient border */}
             <motion.div
               style={{ opacity: traitsOpacity, pointerEvents: 'none' }}
-              className={`relative w-36 h-36 sm:w-56 sm:h-56 rounded-full bg-gradient-to-br ${trait.gradient} p-1 shadow-lg`}
+              className={`relative w-28 h-28 sm:w-56 sm:h-56 rounded-full bg-gradient-to-br ${trait.gradient} p-1 shadow-lg`}
             >
               {/* Inner circle */}
-              <div className="w-full h-full rounded-full bg-neutral-950 flex items-center justify-center p-4 sm:p-6">
-                <h3 className="text-white text-center text-sm sm:text-xl font-semibold leading-tight">
+              <div className="w-full h-full rounded-full bg-neutral-950 flex items-center justify-center p-2 sm:p-6">
+                <h3 className="text-white text-center text-xs sm:text-xl font-semibold leading-tight">
                   {trait.title}
                 </h3>
               </div>
@@ -358,7 +358,7 @@ const TraitsConvergence = () => {
           className="absolute"
         >
           {/* Large merged circle */}
-          <div className="relative w-56 h-56 sm:w-80 sm:h-80 rounded-full bg-gradient-to-br from-pink-300 via-slate-500 to-purple-500 p-1.5 shadow-2xl">
+          <div className="relative w-48 h-48 sm:w-80 sm:h-80 rounded-full bg-gradient-to-br from-pink-300 via-slate-500 to-purple-500 p-1.5 shadow-2xl">
             {/* Inner circle with image */}
             <div className="w-full h-full rounded-full overflow-hidden border-4 border-neutral-950">
               <img
@@ -372,9 +372,9 @@ const TraitsConvergence = () => {
           {/* Name below the circle */}
           <motion.div
             style={{ opacity: mergedOpacity }}
-            className="absolute -bottom-16 sm:-bottom-20 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
+            className="absolute -bottom-12 sm:-bottom-20 left-1/2 -translate-x-1/2 text-center whitespace-nowrap"
           >
-            <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
+            <h2 className="text-lg sm:text-4xl font-bold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
               Zohaib Cheema
             </h2>
             <p className="text-neutral-400 text-xs sm:text-base mt-1 sm:mt-2">
