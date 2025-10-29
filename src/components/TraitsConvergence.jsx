@@ -174,10 +174,12 @@ const TraitsConvergence = () => {
           accumulatedDelta = 0;
           progress.set(0);
           setAnimationComplete(false);
+          isFlickScrolling = true;
+          lastScrollY = window.scrollY; // Lock current scroll position
         }
       }
       
-      // MOBILE: If locked, hijack touch scrolling
+      // MOBILE: If locked, hijack touch scrolling and progress animation
       if (isLocked && !animationComplete) {
         e.preventDefault();
         e.stopPropagation();
@@ -198,6 +200,7 @@ const TraitsConvergence = () => {
         if (accumulatedDelta >= 0.99) {
           setAnimationComplete(true);
           setIsLocked(false);
+          isFlickScrolling = false;
         }
       }
       
@@ -209,18 +212,19 @@ const TraitsConvergence = () => {
           setAnimationComplete(false);
           accumulatedDelta = 0;
           progress.set(0);
+          isFlickScrolling = false;
         }
       }
     };
 
-    // MOBILE: Handle flick/momentum scrolling
+    // MOBILE: Handle scroll hijacking and animation progress
     const handleScroll = () => {
       const rect = section.getBoundingClientRect();
       const currentScrollY = window.scrollY;
       
       // MOBILE: Check if section is in view and we should lock
       if (!isLocked && !animationComplete && rect.top < window.innerHeight / 2 && rect.top > -100) {
-        // User is flick scrolling into the section, lock it
+        // User is scrolling into the section, lock it
         setIsLocked(true);
         accumulatedDelta = 0;
         progress.set(0);
@@ -230,11 +234,14 @@ const TraitsConvergence = () => {
         return;
       }
       
-      // MOBILE: If locked and flick scrolling, progress animation instead of scrolling
-      if (isLocked && !animationComplete && isFlickScrolling) {
+      // MOBILE: If locked, hijack scroll and progress animation
+      if (isLocked && !animationComplete) {
         const scrollDelta = currentScrollY - lastScrollY;
         
-        // MOBILE: Use scroll delta to progress animation
+        // MOBILE: Restore scroll position to locked position (hijack the scroll)
+        window.scrollTo(0, lastScrollY);
+        
+        // MOBILE: Use scroll attempt to progress animation
         accumulatedDelta += Math.abs(scrollDelta) * MOBILE_SCROLL_SENSITIVITY;
         accumulatedDelta = Math.max(0, Math.min(1, accumulatedDelta));
         
@@ -249,14 +256,16 @@ const TraitsConvergence = () => {
         }
       }
       
-      // MOBILE: Update last scroll position
-      lastScrollY = currentScrollY;
+      // MOBILE: Update last scroll position when not locked
+      if (!isLocked) {
+        lastScrollY = currentScrollY;
+      }
     };
 
-    // MOBILE: Add touch event listeners + scroll listener for flick scrolling
+    // MOBILE: Add touch event listeners + scroll listener for scroll hijacking
     document.addEventListener("touchstart", handleTouchStart, { passive: true });
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: false }); // Changed to false to allow preventDefault
 
     return () => {
       observer.disconnect();
