@@ -169,11 +169,8 @@ export default async function handler(req, res) {
       }
     }
 
-    // Remove old slots (past dates and any slots that don't match our rules)
-    await sql`DELETE FROM slots WHERE date < CURRENT_DATE`;
-    
-    // Also delete any slots that are outside the 11am-5pm EST range or have more than 3 slots per day
-    // This ensures we only have valid slots
+    // Delete ALL existing slots for work days to ensure clean regeneration
+    // This removes any old invalid slots
     const workDayDates = workDays.map(d => {
       const year = d.getFullYear();
       const month = d.getMonth() + 1;
@@ -181,25 +178,29 @@ export default async function handler(req, res) {
       return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     });
     
+    // Delete all slots for these dates (will be regenerated with correct times)
     for (const dateStr of workDayDates) {
-      // Count slots for this date
-      const countResult = await sql`
-        SELECT COUNT(*) as count FROM slots WHERE date = ${dateStr}
-      `;
-      const slotCount = parseInt(countResult.rows[0].count);
-      
-      // If more than 3 slots, delete all for this date (will be regenerated)
-      if (slotCount > 3) {
-        await sql`DELETE FROM slots WHERE date = ${dateStr}`;
-      }
-      
-      // Delete any slots with times outside 11:00-17:00 (11am-5pm)
-      await sql`
-        DELETE FROM slots 
-        WHERE date = ${dateStr} 
-        AND (time < '11:00' OR time >= '17:00')
-      `;
+      await sql`DELETE FROM slots WHERE date = ${dateStr}`;
     }
+    
+    // Also remove old slots (past dates)
+    await sql`DELETE FROM slots WHERE date < CURRENT_DATE`;
+    
+    // Delete ANY slots with times outside 11:00-17:00 (11am-5pm EST) - this catches all old invalid slots
+    await sql`
+      DELETE FROM slots 
+      WHERE time < '11:00' OR time >= '17:00'
+    `;
+    
+    // Delete any dates that have more than 3 slots
+    await sql`
+      DELETE FROM slots
+      WHERE date IN (
+        SELECT date FROM slots
+        GROUP BY date
+        HAVING COUNT(*) > 3
+      )
+    `;
 
     return res.status(200).json({
       success: true,

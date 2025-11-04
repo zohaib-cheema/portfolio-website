@@ -94,7 +94,7 @@ const Calendar = () => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return slots
       .filter(slot => {
-        // Convert slot datetime to user's timezone and check if date matches
+        // Convert UTC datetime to user's timezone and check if date matches
         if (!slot.datetime) return false;
         const slotDate = parseISO(slot.datetime);
         const userLocalDate = toZonedTime(slotDate, userTimezone || 'UTC');
@@ -111,10 +111,10 @@ const Calendar = () => {
   };
 
   const formatSlotTime = (slot) => {
-    if (!slot.datetime) return slot.time;
-    // Slot datetime is stored in UTC, convert to user's timezone
+    // Convert UTC datetime to user's timezone for display
+    if (!slot.datetime) return slot.time || 'N/A';
     const slotDate = parseISO(slot.datetime);
-    // toZonedTime converts UTC to the specified timezone's local time
+    // toZonedTime converts UTC datetime to user's local timezone
     const userLocalTime = toZonedTime(slotDate, userTimezone || 'UTC');
     return format(userLocalTime, 'h:mm a');
   };
@@ -257,8 +257,7 @@ const Calendar = () => {
               <div className="mb-6 p-4 bg-neutral-800/50 rounded-lg">
                 <p className="text-neutral-400 text-sm">Selected Time</p>
                 <p className="text-white font-semibold">
-                  {format(toZonedTime(parseISO(selectedSlot.datetime), userTimezone || 'UTC'), 'EEEE, MMMM d, yyyy')} at{' '}
-                  {format(toZonedTime(parseISO(selectedSlot.datetime), userTimezone || 'UTC'), 'h:mm a')}
+                  {format(toZonedTime(parseISO(selectedSlot.datetime), userTimezone || 'UTC'), 'EEEE, MMMM d, yyyy')} at {formatSlotTime(selectedSlot)}
                 </p>
                 <p className="text-neutral-500 text-xs mt-1">
                   {userTimezone ? `(${userTimezone})` : ''}
