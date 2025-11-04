@@ -170,8 +170,13 @@ export default async function handler(req, res) {
 
     // Send email to requester
     try {
+      // Use Resend's default domain if custom domain isn't verified
+      // For production, verify your domain in Resend and use: noreply@zohaibcheema.com
+      // For testing, use: onboarding@resend.dev (works without domain verification)
+      const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+      
       const emailData = {
-        from: 'Zohaib Cheema <noreply@zohaibcheema.com>',
+        from: `Zohaib Cheema <${fromEmail}>`,
         to: request.requester_email,
         subject: 'Zohaib Cheema - Resume',
         html: `

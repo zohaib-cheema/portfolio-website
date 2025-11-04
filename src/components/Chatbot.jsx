@@ -107,8 +107,8 @@ const Chatbot = () => {
       setCollectedData(prev => ({ ...prev, meetingType: type }));
       setConversationState('meeting_email');
       addMessage('user', type);
-      addMessage('bot', `Perfect! A ${type} meeting sounds great. Now I'll need your professional email address to send you the calendar link.`);
-      addMessage('bot', "What's your professional email address? (e.g., name@company.com or name@company.edu)");
+      addMessage('bot', `Perfect! A ${type} meeting sounds great. Now I'll need your email address to send you the calendar link.`);
+      addMessage('bot', "What's your email address?");
     }
   };
 

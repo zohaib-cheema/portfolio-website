@@ -47,8 +47,13 @@ export default async function handler(req, res) {
     const bookedSlot = result.rows[0];
 
     // Send confirmation emails
-    try {
-      if (process.env.RESEND_API_KEY) {
+    let emailErrors = [];
+    
+    if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY not set - emails will not be sent');
+      emailErrors.push('RESEND_API_KEY not configured');
+    } else {
+      try {
         const emailDate = new Date(bookedSlot.datetime);
         const formattedDate = emailDate.toLocaleDateString('en-US', { 
           weekday: 'long', 
@@ -65,10 +70,15 @@ export default async function handler(req, res) {
         // Get Zoom link from environment variable
         const zoomLink = process.env.ZOOM_LINK || '';
 
+        // Use Resend's default domain if custom domain isn't verified
+        // For production, verify your domain in Resend and use: noreply@zohaibcheema.com
+        // For testing, use: onboarding@resend.dev (works without domain verification)
+        const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+
         // Send confirmation to the attendee
         try {
-          await resend.emails.send({
-            from: 'Zohaib Cheema <noreply@zohaibcheema.com>',
+          const attendeeResult = await resend.emails.send({
+            from: `Zohaib Cheema <${fromEmail}>`,
             to: email,
             subject: `Meeting Confirmed: ${formattedDate} at ${formattedTime}`,
             html: `
@@ -91,15 +101,18 @@ export default async function handler(req, res) {
               </div>
             `,
           });
+          console.log('Attendee email sent successfully:', attendeeResult);
         } catch (attendeeEmailError) {
-          console.error('Error sending confirmation email to attendee:', attendeeEmailError);
+          const errorMsg = `Error sending confirmation email to attendee (${email}): ${attendeeEmailError.message || attendeeEmailError}`;
+          console.error(errorMsg, attendeeEmailError);
+          emailErrors.push(errorMsg);
         }
 
         // Send notification to Zohaib
         const yourEmail = process.env.YOUR_EMAIL || 'zohaib.s.cheema9@gmail.com';
         try {
-          await resend.emails.send({
-            from: 'Portfolio Bot <noreply@zohaibcheema.com>',
+          const yourEmailResult = await resend.emails.send({
+            from: `Portfolio Bot <${fromEmail}>`,
             to: yourEmail,
             subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
             html: `
@@ -122,15 +135,17 @@ export default async function handler(req, res) {
               </div>
             `,
           });
+          console.log('Notification email sent successfully to Zohaib:', yourEmailResult);
         } catch (yourEmailError) {
-          console.error('Error sending notification email to Zohaib:', yourEmailError);
+          const errorMsg = `Error sending notification email to Zohaib (${yourEmail}): ${yourEmailError.message || yourEmailError}`;
+          console.error(errorMsg, yourEmailError);
+          emailErrors.push(errorMsg);
         }
-      } else {
-        console.error('RESEND_API_KEY not set - emails not sent');
+      } catch (emailError) {
+        const errorMsg = `General email error: ${emailError.message || emailError}`;
+        console.error(errorMsg, emailError);
+        emailErrors.push(errorMsg);
       }
-    } catch (emailError) {
-      console.error('Error sending emails:', emailError);
-      // Don't fail the booking if email fails
     }
 
     return res.status(200).json({

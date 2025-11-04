@@ -90,9 +90,14 @@ export default async function handler(req, res) {
     const approveUrl = `${baseUrl}/api/resume/approve/${requestId}`;
     const denyUrl = `${baseUrl}/api/resume/deny/${requestId}`;
 
+    // Use Resend's default domain if custom domain isn't verified
+    // For production, verify your domain in Resend and use: noreply@zohaibcheema.com
+    // For testing, use: onboarding@resend.dev (works without domain verification)
+    const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+
     try {
       await resend.emails.send({
-        from: 'Portfolio Bot <noreply@zohaibcheema.com>',
+        from: `Portfolio Bot <${fromEmail}>`,
         to: yourEmail,
         subject: `Resume Request from ${email}`,
         html: `
