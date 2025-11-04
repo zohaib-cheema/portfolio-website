@@ -1,0 +1,6 @@
+Your Resume PDF URL:
+https://nw3l1qo3ggwqlzil.public.blob.vercel-storage.com/Resume%20-%20ZohaibSCheema.pdf
+
+Copy this URL and add it to Vercel Environment Variables as:
+RESUME_PDF_URL = https://nw3l1qo3ggwqlzil.public.blob.vercel-storage.com/Resume%20-%20ZohaibSCheema.pdf
+
