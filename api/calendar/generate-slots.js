@@ -1,7 +1,7 @@
 /**
  * API endpoint to generate calendar slots for next 14 work days
  * POST /api/calendar/generate-slots
- * Generates random slots between 11:00 AM - 5:00 PM EST (max 3 per day)
+ * Generates random slots between 11:00 AM - 5:00 PM EST (2-4 slots per day)
  */
 
 import { sql } from '@vercel/postgres';
@@ -86,9 +86,9 @@ function generateRandomSlotsForDay(date) {
     return Math.abs(hash) / 2147483647; // Normalize to 0-1
   };
   
-  // Generate random number of slots (1-3 slots per day) using seeded random
+  // Generate random number of slots (2-4 slots per day) using seeded random
   const slotCountSeed = seededRandom(dateSeed + 'count');
-  const numberOfSlots = Math.floor(slotCountSeed * 3) + 1;
+  const numberOfSlots = Math.floor(slotCountSeed * 3) + 2; // 2-4 slots (0-2 + 2 = 2-4)
   
   // Create all possible 30-minute time slots between 11:00 AM and 5:00 PM EST
   const availableTimes = [];
@@ -166,13 +166,13 @@ export default async function handler(req, res) {
       WHERE time < '11:00' OR time >= '17:00'
     `;
     
-    // Delete any dates that have more than 3 slots
+    // Delete any dates that have more than 4 slots
     await sql`
       DELETE FROM slots
       WHERE date IN (
         SELECT date FROM slots
         GROUP BY date
-        HAVING COUNT(*) > 3
+        HAVING COUNT(*) > 4
       )
     `;
     

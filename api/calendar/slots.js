@@ -55,7 +55,7 @@ export default async function handler(req, res) {
   try {
     // Fetch available slots from database
     // Only return slots that are between 11:00 AM and 5:00 PM EST (stored as 11:00-17:00)
-    // And ensure max 3 slots per day
+    // And ensure max 4 slots per day
     const result = await sql`
       WITH ranked_slots AS (
         SELECT 
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
         "createdAt",
         "bookedAt"
       FROM ranked_slots
-      WHERE slot_rank <= 3
+      WHERE slot_rank <= 4
       ORDER BY date, time
     `;
 
