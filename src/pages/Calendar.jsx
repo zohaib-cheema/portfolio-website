@@ -19,6 +19,7 @@ const Calendar = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [userTimezone, setUserTimezone] = useState('');
+  const [expandedDates, setExpandedDates] = useState(new Set());
 
   useEffect(() => {
     // Detect user's timezone
@@ -400,19 +401,42 @@ const Calendar = () => {
                             {format(date, 'd')}
                           </div>
                           <div className="space-y-1">
-                            {dateSlots.slice(0, 2).map((slot) => (
-                              <button
-                                key={slot.id}
-                                onClick={() => handleSlotSelect(slot)}
-                                className="w-full text-xs px-2 py-1 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/30 hover:to-purple-500/30 border border-pink-500/30 rounded text-neutral-200 hover:text-white transition-all text-left"
-                              >
-                                {formatSlotTime(slot)}
-                              </button>
-                            ))}
-                            {dateSlots.length > 2 && (
-                              <div className="text-xs text-neutral-500">
-                                +{dateSlots.length - 2} more
-                              </div>
+                            {dateSlots.length === 0 ? (
+                              <div className="text-xs text-neutral-600">No slots</div>
+                            ) : (
+                              <>
+                                {dateSlots.slice(0, expandedDates.has(format(date, 'yyyy-MM-dd')) ? dateSlots.length : 2).map((slot) => (
+                                  <button
+                                    key={slot.id}
+                                    onClick={() => handleSlotSelect(slot)}
+                                    className="w-full text-xs px-2 py-1 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/30 hover:to-purple-500/30 border border-pink-500/30 rounded text-neutral-200 hover:text-white transition-all text-left"
+                                  >
+                                    {formatSlotTime(slot)}
+                                  </button>
+                                ))}
+                                {dateSlots.length > 2 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const dateKey = format(date, 'yyyy-MM-dd');
+                                      setExpandedDates(prev => {
+                                        const newSet = new Set(prev);
+                                        if (newSet.has(dateKey)) {
+                                          newSet.delete(dateKey);
+                                        } else {
+                                          newSet.add(dateKey);
+                                        }
+                                        return newSet;
+                                      });
+                                    }}
+                                    className="w-full text-xs px-2 py-1 text-neutral-400 hover:text-neutral-200 transition-colors text-left"
+                                  >
+                                    {expandedDates.has(format(date, 'yyyy-MM-dd')) 
+                                      ? 'Show less' 
+                                      : `+${dateSlots.length - 2} more`}
+                                  </button>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
