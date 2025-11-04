@@ -16,6 +16,7 @@ const Calendar = () => {
   });
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     fetchSlots();
@@ -39,7 +40,7 @@ const Calendar = () => {
     }
   }, []);
 
-  const fetchSlots = async () => {
+  const fetchSlots = async (skipAutoGenerate = false) => {
     try {
       const response = await fetch('/api/calendar/slots');
       if (!response.ok) {
@@ -48,16 +49,47 @@ const Calendar = () => {
       const data = await response.json();
       if (data.success) {
         setSlots(data.slots || []);
+        
+        // If no slots exist and we haven't tried generating yet, automatically generate them
+        if (!skipAutoGenerate && data.slots && data.slots.length === 0 && !isGenerating && !loading) {
+          setIsGenerating(true);
+          await generateSlots();
+        }
       } else {
         console.error('Failed to fetch slots:', data.error);
-        setSlots([]); // Set empty array on error
+        setSlots([]);
       }
     } catch (error) {
       console.error('Error fetching slots:', error);
-      // On error, show empty state instead of crashing
       setSlots([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const generateSlots = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/calendar/generate-slots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // Refresh slots after generation (skip auto-generate to prevent loop)
+          await fetchSlots(true);
+        }
+      } else {
+        console.error('Failed to generate slots');
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Error generating slots:', error);
+      setLoading(false);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -248,17 +280,14 @@ const Calendar = () => {
                   <label className="block text-sm font-medium text-neutral-300 mb-2">
                     Meeting Type *
                   </label>
-                  <select
+                  <input
+                    type="text"
                     required
                     value={bookingForm.meetingType}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, meetingType: e.target.value }))}
                     className="w-full bg-neutral-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                  >
-                    <option value="Mentorship">Mentorship</option>
-                    <option value="Career Discussion">Career Discussion</option>
-                    <option value="Interview Prep">Interview Prep</option>
-                    <option value="Other">Other</option>
-                  </select>
+                    placeholder="e.g., Mentorship, Career Discussion, Interview Prep"
+                  />
                 </div>
 
                 <div>
@@ -305,9 +334,17 @@ const Calendar = () => {
             {sortedDates.length === 0 ? (
               <div className="text-center py-12 bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 rounded-3xl">
                 <FaClock className="text-5xl text-neutral-600 mx-auto mb-4" />
-                <p className="text-neutral-400 text-lg">
-                  No available time slots at the moment. Please check back later.
+                <p className="text-neutral-400 text-lg mb-4">
+                  {loading ? 'Generating available time slots...' : 'No available time slots at the moment.'}
                 </p>
+                {!loading && (
+                  <button
+                    onClick={generateSlots}
+                    className="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity"
+                  >
+                    Generate Time Slots
+                  </button>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

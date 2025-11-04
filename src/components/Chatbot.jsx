@@ -98,11 +98,61 @@ const Chatbot = () => {
     }
   };
 
-  const handleMeetingTypeSelected = (type) => {
-    setCollectedData(prev => ({ ...prev, meetingType: type }));
+  const handleMeetingTypeSelected = async (type) => {
+    if (type === 'Other') {
+      setConversationState('meeting_other_topic');
+      addMessage('user', type);
+      addMessage('bot', "Sure! What would you like to discuss in the meeting?");
+    } else {
+      setCollectedData(prev => ({ ...prev, meetingType: type }));
+      setConversationState('meeting_email');
+      addMessage('user', type);
+      addMessage('bot', `Perfect! A ${type} meeting sounds great. Now I'll need your professional email address to send you the calendar link.`);
+      addMessage('bot', "What's your professional email address? (e.g., name@company.com or name@company.edu)");
+    }
+  };
+
+  const handleOtherTopicSubmit = async (topic) => {
+    if (!topic.trim()) {
+      addMessage('bot', "Please tell me what the meeting is about.");
+      return;
+    }
+
+    setCollectedData(prev => ({ ...prev, meetingType: 'Other', otherTopic: topic.trim() }));
+    addMessage('user', topic.trim());
+
+    // Generate AI response
+    try {
+      addMessage('bot', '...', { isProcessing: true });
+      
+      const response = await fetch('/api/ai/generate-response', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: topic.trim() }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.response) {
+          // Remove processing message
+          setMessages(prev => prev.slice(0, -1));
+          addMessage('bot', data.response);
+        } else {
+          setMessages(prev => prev.slice(0, -1));
+          addMessage('bot', `A meeting about ${topic.trim()} sounds great!`);
+        }
+      } else {
+        setMessages(prev => prev.slice(0, -1));
+        addMessage('bot', `A meeting about ${topic.trim()} sounds great!`);
+      }
+    } catch (error) {
+      console.error('AI response error:', error);
+      setMessages(prev => prev.slice(0, -1));
+      addMessage('bot', `A meeting about ${topic.trim()} sounds great!`);
+    }
+
     setConversationState('meeting_email');
-    addMessage('user', type);
-    addMessage('bot', `Perfect! A ${type} meeting sounds great. Now I'll need your professional email address to send you the calendar link.`);
+    addMessage('bot', "Now I'll need your professional email address to send you the calendar link.");
     addMessage('bot', "What's your professional email address? (e.g., name@company.com or name@company.edu)");
   };
 
@@ -155,7 +205,7 @@ const Chatbot = () => {
     setCollectedData(prev => ({ ...prev, email }));
     addMessage('user', email);
     addMessage('bot', `Perfect! I have all your information, ${collectedData.firstName}.`);
-    addMessage('bot', `Click the button below to open the calendar page where you can view available time slots and book your ${collectedData.meetingType} meeting.`, { showCalendarButton: true });
+    addMessage('bot', `Click the button below to open the calendar page where you can view available time slots and book your meeting.`, { showCalendarButton: true });
     setConversationState('idle');
   };
 
@@ -165,7 +215,9 @@ const Chatbot = () => {
     const dataToPass = {
       name: `${collectedData.firstName} ${collectedData.lastName}`,
       email: collectedData.email,
-      meetingType: collectedData.meetingType,
+      meetingType: collectedData.meetingType === 'Other' && collectedData.otherTopic 
+        ? collectedData.otherTopic 
+        : collectedData.meetingType,
     };
     
     // Store in sessionStorage for the calendar page to pick up
@@ -203,6 +255,9 @@ const Chatbot = () => {
         break;
       case 'meeting_lastname':
         handleLastName(userMessage);
+        break;
+      case 'meeting_other_topic':
+        handleOtherTopicSubmit(userMessage);
         break;
       case 'meeting_email':
         handleMeetingEmailSubmit(userMessage);
