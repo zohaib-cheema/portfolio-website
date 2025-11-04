@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaCalendarCheck, FaClock } from 'react-icons/fa';
-import { format, addDays, isWeekend, startOfWeek, addWeeks, parseISO } from 'date-fns';
+import { FaCalendarCheck, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { format, parseISO, startOfWeek, addWeeks, addDays, isSameDay, isSameMonth, startOfMonth, endOfMonth, eachWeekOfInterval, getDay } from 'date-fns';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 import { validateProfessionalEmail } from '../utils/emailValidation';
 
 const Calendar = () => {
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [bookingForm, setBookingForm] = useState({
     name: '',
     email: '',
@@ -16,9 +18,13 @@ const Calendar = () => {
   });
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [userTimezone, setUserTimezone] = useState('');
 
   useEffect(() => {
+    // Detect user's timezone
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    setUserTimezone(tz);
+    
     fetchSlots();
     
     // Check for pre-filled data from chatbot
@@ -32,7 +38,6 @@ const Calendar = () => {
           email: data.email || prev.email,
           meetingType: data.meetingType || prev.meetingType,
         }));
-        // Clear the stored data after using it
         sessionStorage.removeItem('bookingPrefills');
       }
     } catch (error) {
@@ -50,9 +55,8 @@ const Calendar = () => {
       if (data.success) {
         setSlots(data.slots || []);
         
-        // If no slots exist and we haven't tried generating yet, automatically generate them
-        if (!skipAutoGenerate && data.slots && data.slots.length === 0 && !isGenerating && !loading) {
-          setIsGenerating(true);
+        // Auto-generate slots if none exist (silent, no user interaction)
+        if (!skipAutoGenerate && data.slots && data.slots.length === 0) {
           await generateSlots();
         }
       } else {
@@ -69,7 +73,6 @@ const Calendar = () => {
 
   const generateSlots = async () => {
     try {
-      setLoading(true);
       const response = await fetch('/api/calendar/generate-slots', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -78,45 +81,52 @@ const Calendar = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          // Refresh slots after generation (skip auto-generate to prevent loop)
           await fetchSlots(true);
         }
-      } else {
-        console.error('Failed to generate slots');
-        setLoading(false);
       }
     } catch (error) {
       console.error('Error generating slots:', error);
-      setLoading(false);
-    } finally {
-      setIsGenerating(false);
     }
   };
 
-  const groupSlotsByDate = (slots) => {
-    const grouped = {};
-    slots.forEach(slot => {
-      const date = slot.date;
-      if (!grouped[date]) {
-        grouped[date] = [];
-      }
-      grouped[date].push(slot);
-    });
-    return grouped;
+  const getSlotsForDate = (date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return slots
+      .filter(slot => {
+        // Convert slot datetime to user's timezone and check if date matches
+        if (!slot.datetime) return false;
+        const slotDate = parseISO(slot.datetime);
+        const userLocalDate = toZonedTime(slotDate, userTimezone || 'UTC');
+        return format(userLocalDate, 'yyyy-MM-dd') === dateStr && slot.available;
+      })
+      .sort((a, b) => {
+        // Sort by time in user's timezone
+        const timeA = parseISO(a.datetime);
+        const timeB = parseISO(b.datetime);
+        const userTimeA = toZonedTime(timeA, userTimezone || 'UTC');
+        const userTimeB = toZonedTime(timeB, userTimezone || 'UTC');
+        return userTimeA.getTime() - userTimeB.getTime();
+      });
+  };
+
+  const formatSlotTime = (slot) => {
+    if (!slot.datetime) return slot.time;
+    const slotDate = parseISO(slot.datetime);
+    const userLocalTime = toZonedTime(slotDate, userTimezone || 'UTC');
+    return format(userLocalTime, 'h:mm a');
   };
 
   const handleSlotSelect = (slot) => {
     setSelectedSlot(slot);
     setBookingForm(prev => ({
       ...prev,
-      email: prev.email || '', // Keep existing email if available
+      email: prev.email || '',
     }));
   };
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate email
     const emailValidation = validateProfessionalEmail(bookingForm.email);
     if (!emailValidation.valid) {
       alert(emailValidation.message);
@@ -144,15 +154,14 @@ const Calendar = () => {
 
       if (response.ok) {
         setBookingSuccess(true);
-        // Refresh slots to update availability
         setTimeout(() => {
-          fetchSlots();
+          fetchSlots(true);
           setSelectedSlot(null);
           setBookingForm({ name: '', email: '', meetingType: 'Mentorship', notes: '' });
         }, 2000);
       } else {
-        alert(data.error || 'Failed to book the slot. It may have been taken by someone else.');
-        fetchSlots(); // Refresh to get updated availability
+        alert(data.error || 'This slot has already been booked. Please select another time.');
+        fetchSlots(true);
       }
     } catch (error) {
       alert('Sorry, there was an issue booking the slot. Please try again.');
@@ -162,15 +171,24 @@ const Calendar = () => {
     }
   };
 
-  const groupedSlots = groupSlotsByDate(slots);
-  const sortedDates = Object.keys(groupedSlots).sort();
+  const nextMonth = () => {
+    setCurrentMonth(addDays(startOfMonth(currentMonth), 32));
+  };
+
+  const prevMonth = () => {
+    setCurrentMonth(addDays(startOfMonth(currentMonth), -1));
+  };
+
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  const weeks = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
 
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-300 flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-neutral-400">Loading available time slots...</p>
+          <p className="text-neutral-400">Loading calendar...</p>
         </div>
       </div>
     );
@@ -178,30 +196,27 @@ const Calendar = () => {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-300">
-      {/* Background gradient */}
       <div className="fixed top-0 -z-10 h-full w-full">
         <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
       </div>
 
       <div className="container mx-auto px-4 sm:px-8 md:px-16 py-20">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-8"
         >
-          <button
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors mb-6"
-          >
-            <FaArrowLeft /> Back to Portfolio
-          </button>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent text-center mb-4">
             Schedule a Meeting
           </h1>
           <p className="text-center text-neutral-400">
             Select an available time slot to book a meeting with Zohaib
           </p>
+          {userTimezone && (
+            <p className="text-center text-neutral-500 text-sm mt-2">
+              Times shown in your timezone: {userTimezone}
+            </p>
+          )}
         </motion.div>
 
         {bookingSuccess ? (
@@ -219,7 +234,7 @@ const Calendar = () => {
               onClick={() => {
                 setBookingSuccess(false);
                 setSelectedSlot(null);
-                fetchSlots();
+                fetchSlots(true);
               }}
               className="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity"
             >
@@ -239,8 +254,11 @@ const Calendar = () => {
               <div className="mb-6 p-4 bg-neutral-800/50 rounded-lg">
                 <p className="text-neutral-400 text-sm">Selected Time</p>
                 <p className="text-white font-semibold">
-                  {format(parseISO(selectedSlot.datetime), 'EEEE, MMMM d, yyyy')} at{' '}
-                  {format(parseISO(selectedSlot.datetime), 'h:mm a')}
+                  {format(toZonedTime(parseISO(selectedSlot.datetime), userTimezone || 'UTC'), 'EEEE, MMMM d, yyyy')} at{' '}
+                  {format(toZonedTime(parseISO(selectedSlot.datetime), userTimezone || 'UTC'), 'h:mm a')}
+                </p>
+                <p className="text-neutral-500 text-xs mt-1">
+                  {userTimezone ? `(${userTimezone})` : ''}
                 </p>
               </div>
 
@@ -331,58 +349,109 @@ const Calendar = () => {
           </motion.div>
         ) : (
           <div className="max-w-6xl mx-auto">
-            {sortedDates.length === 0 ? (
-              <div className="text-center py-12 bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 rounded-3xl">
-                <FaClock className="text-5xl text-neutral-600 mx-auto mb-4" />
-                <p className="text-neutral-400 text-lg mb-4">
-                  {loading ? 'Generating available time slots...' : 'No available time slots at the moment.'}
-                </p>
-                {!loading && (
-                  <button
-                    onClick={generateSlots}
-                    className="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity"
-                  >
-                    Generate Time Slots
-                  </button>
-                )}
+            {/* Calendar Header */}
+            <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-6 rounded-3xl shadow-lg mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <button
+                  onClick={prevMonth}
+                  className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
+                >
+                  <FaChevronLeft className="text-neutral-400" />
+                </button>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
+                  {format(currentMonth, 'MMMM yyyy')}
+                </h2>
+                <button
+                  onClick={nextMonth}
+                  className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
+                >
+                  <FaChevronRight className="text-neutral-400" />
+                </button>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {sortedDates.map((date) => (
-                  <motion.div
-                    key={date}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-6 rounded-3xl shadow-lg"
-                  >
-                    <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
-                      {format(parseISO(date), 'EEEE, MMMM d')}
-                    </h3>
-                    <div className="space-y-2">
-                      {groupedSlots[date]
-                        .sort((a, b) => a.time.localeCompare(b.time))
-                        .map((slot) => (
-                          <button
-                            key={slot.id}
-                            onClick={() => handleSlotSelect(slot)}
-                            disabled={!slot.available}
-                            className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
-                              slot.available
-                                ? 'bg-neutral-800 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 border border-neutral-700 hover:border-pink-500/50 cursor-pointer'
-                                : 'bg-neutral-900/50 text-neutral-600 cursor-not-allowed border border-neutral-800'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium">{slot.time}</span>
-                              {!slot.available && (
-                                <span className="text-xs text-neutral-600">Booked</span>
-                              )}
-                            </div>
-                          </button>
-                        ))}
-                    </div>
-                  </motion.div>
+
+              {/* Calendar Grid */}
+              <div className="grid grid-cols-7 gap-2">
+                {/* Day Headers */}
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                  <div key={day} className="text-center text-sm font-semibold text-neutral-400 pb-2">
+                    {day}
+                  </div>
                 ))}
+
+                {/* Calendar Days */}
+                {weeks.map((week, weekIdx) => (
+                  <div key={weekIdx} className="contents">
+                    {Array.from({ length: 7 }).map((_, dayIdx) => {
+                      const date = addDays(week, dayIdx);
+                      const isCurrentMonth = isSameMonth(date, currentMonth);
+                      const isToday = isSameDay(date, new Date());
+                      const dateSlots = getSlotsForDate(date);
+
+                      return (
+                        <div
+                          key={dayIdx}
+                          className={`min-h-[120px] p-2 border border-neutral-800 rounded-lg ${
+                            isCurrentMonth ? 'bg-neutral-900/30' : 'bg-neutral-950/50'
+                          } ${isToday ? 'ring-2 ring-pink-500/50' : ''}`}
+                        >
+                          <div className={`text-sm font-medium mb-1 ${
+                            isCurrentMonth ? 'text-neutral-300' : 'text-neutral-600'
+                          } ${isToday ? 'text-pink-400' : ''}`}>
+                            {format(date, 'd')}
+                          </div>
+                          <div className="space-y-1">
+                            {dateSlots.slice(0, 2).map((slot) => (
+                              <button
+                                key={slot.id}
+                                onClick={() => handleSlotSelect(slot)}
+                                className="w-full text-xs px-2 py-1 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/30 hover:to-purple-500/30 border border-pink-500/30 rounded text-neutral-200 hover:text-white transition-all text-left"
+                              >
+                                {formatSlotTime(slot)}
+                              </button>
+                            ))}
+                            {dateSlots.length > 2 && (
+                              <div className="text-xs text-neutral-500">
+                                +{dateSlots.length - 2} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Detailed View for Selected Date */}
+            {slots.length > 0 && (
+              <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-6 rounded-3xl shadow-lg">
+                <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
+                  Available Time Slots
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {slots
+                    .filter(slot => slot.available)
+                    .sort((a, b) => {
+                      const dateCompare = a.date.localeCompare(b.date);
+                      if (dateCompare !== 0) return dateCompare;
+                      return a.time.localeCompare(b.time);
+                    })
+                    .map((slot) => (
+                      <button
+                        key={slot.id}
+                        onClick={() => handleSlotSelect(slot)}
+                        className="px-4 py-3 bg-neutral-800 hover:bg-gradient-to-r hover:from-pink-500/20 hover:to-purple-500/20 border border-neutral-700 hover:border-pink-500/50 rounded-lg transition-all text-left"
+                      >
+                        <div className="text-sm font-medium text-white">
+                          {format(toZonedTime(parseISO(slot.datetime), userTimezone || 'UTC'), 'MMM d')}
+                        </div>
+                        <div className="text-xs text-neutral-400 mt-1">
+                          {formatSlotTime(slot)}
+                        </div>
+                      </button>
+                    ))}
+                </div>
               </div>
             )}
           </div>
@@ -393,4 +462,3 @@ const Calendar = () => {
 };
 
 export default Calendar;
-
