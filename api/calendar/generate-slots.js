@@ -28,11 +28,18 @@ function getNext14WorkDays(startDate) {
 
 function generateRandomSlotsForDay(date) {
   const slots = [];
-  const startHour = 12; // 12pm
-  const endHour = 17; // 5pm
+  const startHour = 12; // 12pm UTC
+  const endHour = 17; // 5pm UTC
   
   // Generate random number of slots (3-7 slots per day)
-  const numberOfSlots = Math.floor(Math.random() * 5) + 3;
+  // Use date as seed for consistent generation
+  const dateSeed = date.getTime();
+  const seededRandom = (seed) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+  
+  const numberOfSlots = Math.floor(seededRandom(dateSeed) * 5) + 3;
   
   // Create all possible time slots
   const availableTimes = [];
@@ -41,18 +48,38 @@ function generateRandomSlotsForDay(date) {
     availableTimes.push(`${hour.toString().padStart(2, '0')}:30`);
   }
   
-  // Randomly select which slots to include
-  const shuffled = [...availableTimes].sort(() => Math.random() - 0.5);
+  // Randomly select which slots to include (using seeded random for consistency)
+  const shuffled = [...availableTimes].sort((a, b) => {
+    const hashA = a.split('').reduce((acc, char) => acc + char.charCodeAt(0) + dateSeed, 0);
+    const hashB = b.split('').reduce((acc, char) => acc + char.charCodeAt(0) + dateSeed, 0);
+    return seededRandom(hashA) - seededRandom(hashB);
+  });
   const selected = shuffled.slice(0, numberOfSlots).sort();
   
-  // Create slot objects
+  // Create slot objects with UTC timestamps
   selected.forEach(time => {
     const dateStr = date.toISOString().split('T')[0];
+    const [hours, minutes] = time.split(':');
+    
+    // Create UTC datetime
+    const utcDate = new Date(Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      parseInt(hours),
+      parseInt(minutes),
+      0,
+      0
+    ));
+    
+    // Format time for display (UTC)
+    const timeDisplay = `${hours}:${minutes}`;
+    
     slots.push({
       id: `slot_${dateStr}_${time.replace(':', '')}`,
       date: dateStr,
-      time: time,
-      datetime: `${dateStr}T${time}:00`,
+      time: timeDisplay,
+      datetime: utcDate.toISOString(), // Store as UTC ISO string
       available: true,
       bookedBy: null,
       bookedEmail: null,
