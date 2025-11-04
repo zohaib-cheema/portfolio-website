@@ -73,8 +73,24 @@ function generateRandomSlotsForDay(date) {
   const month = date.getMonth() + 1;
   const day = date.getDate();
   
-  // Generate random number of slots (1-3 slots per day)
-  const numberOfSlots = Math.floor(Math.random() * 3) + 1;
+  // Use date as seed for consistent generation across all users
+  // This ensures the same date always generates the same slots
+  const dateSeed = `${year}-${month}-${day}`;
+  
+  // Seeded random function for consistency
+  const seededRandom = (seed) => {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      const char = seed.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash) / 2147483647; // Normalize to 0-1
+  };
+  
+  // Generate random number of slots (1-3 slots per day) using seeded random
+  const slotCountSeed = seededRandom(dateSeed + 'count');
+  const numberOfSlots = Math.floor(slotCountSeed * 3) + 1;
   
   // Create all possible 30-minute time slots between 11:00 AM and 5:00 PM EST
   const availableTimes = [];
@@ -83,8 +99,13 @@ function generateRandomSlotsForDay(date) {
     availableTimes.push({ hour, minute: 30 });
   }
   
-  // Randomly shuffle and select slots (truly random)
-  const shuffled = [...availableTimes].sort(() => Math.random() - 0.5);
+  // Shuffle using seeded random for consistency
+  const shuffled = [...availableTimes].sort((a, b) => {
+    const seedA = dateSeed + `${a.hour}:${a.minute}`;
+    const seedB = dateSeed + `${b.hour}:${b.minute}`;
+    return seededRandom(seedA) - seededRandom(seedB);
+  });
+  
   const selected = shuffled.slice(0, numberOfSlots).sort((a, b) => {
     if (a.hour !== b.hour) return a.hour - b.hour;
     return a.minute - b.minute;
