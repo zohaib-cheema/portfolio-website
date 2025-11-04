@@ -27,12 +27,9 @@ function getNext14WorkDays(startDate) {
 }
 
 function convertESTToUTC(year, month, day, hour, minute) {
-  // Create date string in EST
-  const estDateStr = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:00`;
-  
-  // Create date assuming EST timezone (UTC-5)
-  // We'll use a more accurate method by checking DST
-  const testDate = new Date(`${estDateStr} GMT-0500`);
+  // EST is UTC-5, EDT is UTC-4
+  // To convert EST/EDT to UTC, we need to ADD the offset (since EST is behind UTC)
+  // 11:00 AM EST = 11:00 + 5 hours = 4:00 PM UTC (16:00 UTC)
   
   // Check if this date is in DST (EDT = UTC-4)
   // DST in US Eastern Time: Second Sunday in March to First Sunday in November
@@ -49,14 +46,15 @@ function convertESTToUTC(year, month, day, hour, minute) {
   firstSundayNovember.setDate(1 + (7 - november.getDay()) % 7);
   
   const isDST = dateObj >= secondSundayMarch && dateObj < firstSundayNovember;
-  const offset = isDST ? -4 : -5; // EDT is UTC-4, EST is UTC-5
+  const offsetHours = isDST ? 4 : 5; // EDT is UTC-4 (add 4), EST is UTC-5 (add 5)
   
-  // Create UTC date
+  // Create UTC date by adding offset hours
+  // EST 11:00 AM = UTC 4:00 PM (11 + 5 = 16)
   const utcDate = new Date(Date.UTC(
     year,
     month - 1,
     day,
-    hour - offset,
+    hour + offsetHours,
     minute,
     0,
     0
@@ -171,8 +169,37 @@ export default async function handler(req, res) {
       }
     }
 
-    // Remove old slots (past dates)
+    // Remove old slots (past dates and any slots that don't match our rules)
     await sql`DELETE FROM slots WHERE date < CURRENT_DATE`;
+    
+    // Also delete any slots that are outside the 11am-5pm EST range or have more than 3 slots per day
+    // This ensures we only have valid slots
+    const workDayDates = workDays.map(d => {
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const day = d.getDate();
+      return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    });
+    
+    for (const dateStr of workDayDates) {
+      // Count slots for this date
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM slots WHERE date = ${dateStr}
+      `;
+      const slotCount = parseInt(countResult.rows[0].count);
+      
+      // If more than 3 slots, delete all for this date (will be regenerated)
+      if (slotCount > 3) {
+        await sql`DELETE FROM slots WHERE date = ${dateStr}`;
+      }
+      
+      // Delete any slots with times outside 11:00-17:00 (11am-5pm)
+      await sql`
+        DELETE FROM slots 
+        WHERE date = ${dateStr} 
+        AND (time < '11:00' OR time >= '17:00')
+      `;
+    }
 
     return res.status(200).json({
       success: true,

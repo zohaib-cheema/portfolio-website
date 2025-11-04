@@ -54,23 +54,44 @@ export default async function handler(req, res) {
 
   try {
     // Fetch available slots from database
+    // Only return slots that are between 11:00 AM and 5:00 PM EST (stored as 11:00-17:00)
+    // And ensure max 3 slots per day
     const result = await sql`
+      WITH ranked_slots AS (
+        SELECT 
+          id,
+          date,
+          time,
+          datetime,
+          available,
+          booked_by as "bookedBy",
+          booked_email as "bookedEmail",
+          meeting_type as "meetingType",
+          notes,
+          created_at as "createdAt",
+          booked_at as "bookedAt",
+          ROW_NUMBER() OVER (PARTITION BY date ORDER BY time) as slot_rank
+        FROM slots 
+        WHERE available = true 
+        AND date >= CURRENT_DATE 
+        AND date <= CURRENT_DATE + INTERVAL '20 days'
+        AND time >= '11:00'
+        AND time < '17:00'
+      )
       SELECT 
         id,
         date,
         time,
         datetime,
         available,
-        booked_by as "bookedBy",
-        booked_email as "bookedEmail",
-        meeting_type as "meetingType",
+        "bookedBy",
+        "bookedEmail",
+        "meetingType",
         notes,
-        created_at as "createdAt",
-        booked_at as "bookedAt"
-      FROM slots 
-      WHERE available = true 
-      AND date >= CURRENT_DATE 
-      AND date <= CURRENT_DATE + INTERVAL '20 days'
+        "createdAt",
+        "bookedAt"
+      FROM ranked_slots
+      WHERE slot_rank <= 3
       ORDER BY date, time
     `;
 

@@ -112,7 +112,9 @@ const Calendar = () => {
 
   const formatSlotTime = (slot) => {
     if (!slot.datetime) return slot.time;
+    // Slot datetime is stored in UTC, convert to user's timezone
     const slotDate = parseISO(slot.datetime);
+    // toZonedTime converts UTC to the specified timezone's local time
     const userLocalTime = toZonedTime(slotDate, userTimezone || 'UTC');
     return format(userLocalTime, 'h:mm a');
   };
