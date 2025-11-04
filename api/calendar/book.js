@@ -46,7 +46,7 @@ export default async function handler(req, res) {
 
     const bookedSlot = result.rows[0];
 
-    // Send confirmation email
+    // Send confirmation emails
     try {
       if (process.env.RESEND_API_KEY) {
         const emailDate = new Date(bookedSlot.datetime);
@@ -62,29 +62,74 @@ export default async function handler(req, res) {
           hour12: true 
         });
 
-        await resend.emails.send({
-          from: 'Zohaib Cheema <noreply@zohaibcheema.com>',
-          to: email,
-          subject: `Meeting Confirmed: ${formattedDate} at ${formattedTime}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">Meeting Confirmed!</h2>
-              <p>Hi ${name},</p>
-              <p>Your meeting with Zohaib has been confirmed:</p>
-              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p><strong>Date:</strong> ${formattedDate}</p>
-                <p><strong>Time:</strong> ${formattedTime}</p>
-                <p><strong>Type:</strong> ${meetingType}</p>
-                ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
+        // Get Zoom link from environment variable
+        const zoomLink = process.env.ZOOM_LINK || '';
+
+        // Send confirmation to the attendee
+        try {
+          await resend.emails.send({
+            from: 'Zohaib Cheema <noreply@zohaibcheema.com>',
+            to: email,
+            subject: `Meeting Confirmed: ${formattedDate} at ${formattedTime}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">Meeting Confirmed!</h2>
+                <p>Hi ${name},</p>
+                <p>Your meeting with Zohaib has been confirmed:</p>
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <p><strong>Date:</strong> ${formattedDate}</p>
+                  <p><strong>Time:</strong> ${formattedTime}</p>
+                  <p><strong>Type:</strong> ${meetingType}</p>
+                  ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
+                  ${zoomLink ? `
+                    <p style="margin-top: 15px;"><strong>Zoom Link:</strong></p>
+                    <p><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all;">${zoomLink}</a></p>
+                  ` : ''}
+                </div>
+                <p>We look forward to speaking with you!</p>
+                <p>Best regards,<br>Zohaib Cheema</p>
               </div>
-              <p>We look forward to speaking with you!</p>
-              <p>Best regards,<br>Zohaib Cheema</p>
-            </div>
-          `,
-        });
+            `,
+          });
+        } catch (attendeeEmailError) {
+          console.error('Error sending confirmation email to attendee:', attendeeEmailError);
+        }
+
+        // Send notification to Zohaib
+        const yourEmail = process.env.YOUR_EMAIL || 'zohaib.s.cheema9@gmail.com';
+        try {
+          await resend.emails.send({
+            from: 'Portfolio Bot <noreply@zohaibcheema.com>',
+            to: yourEmail,
+            subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">New Meeting Booking</h2>
+                <p>Hi Zohaib,</p>
+                <p>Someone has booked a meeting with you:</p>
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <p><strong>Name:</strong> ${name}</p>
+                  <p><strong>Email:</strong> ${email}</p>
+                  <p><strong>Date:</strong> ${formattedDate}</p>
+                  <p><strong>Time:</strong> ${formattedTime}</p>
+                  <p><strong>Type:</strong> ${meetingType}</p>
+                  ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
+                  ${zoomLink ? `
+                    <p style="margin-top: 15px;"><strong>Zoom Link:</strong></p>
+                    <p><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all;">${zoomLink}</a></p>
+                  ` : ''}
+                </div>
+              </div>
+            `,
+          });
+        } catch (yourEmailError) {
+          console.error('Error sending notification email to Zohaib:', yourEmailError);
+        }
+      } else {
+        console.error('RESEND_API_KEY not set - emails not sent');
       }
     } catch (emailError) {
-      console.error('Error sending confirmation email:', emailError);
+      console.error('Error sending emails:', emailError);
       // Don't fail the booking if email fails
     }
 
