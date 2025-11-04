@@ -69,6 +69,8 @@ export default async function handler(req, res) {
 
         // Get Zoom link from environment variable
         const zoomLink = process.env.ZOOM_LINK || '';
+        const yourEmail = process.env.YOUR_EMAIL || 'zohaib.s.cheema9@gmail.com';
+        const linkedinUrl = 'https://www.linkedin.com/in/zohaibsafdarcheema/';
 
         // Use Resend's default domain if custom domain isn't verified
         // For production, verify your domain in Resend and use: noreply@zohaibcheema.com
@@ -77,15 +79,17 @@ export default async function handler(req, res) {
 
         // Send confirmation to the attendee
         try {
-          const yourEmail = process.env.YOUR_EMAIL || 'zohaib.s.cheema9@gmail.com';
-          const plainText = `Hi ${name},\n\nYour meeting with Zohaib has been confirmed:\n\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}\n\nI look forward to speaking with you!\n\nBest regards,\nZohaib Cheema`;
+          const plainText = `Hi ${name},\n\nYour meeting with Zohaib has been confirmed:\n\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}\n\nI look forward to speaking with you!\n\nBest regards,\nZohaib Cheema\nEmail: ${yourEmail}\nLinkedIn: ${linkedinUrl}`;
 
           const attendeeResult = await resend.emails.send({
             from: `Zohaib Cheema <${fromEmail}>`,
             replyTo: yourEmail,
             to: email,
-            subject: `Meeting Confirmed: ${formattedDate} at ${formattedTime}`,
+            subject: `Meeting Confirmed - ${formattedDate} at ${formattedTime}`,
             text: plainText,
+            headers: {
+              'X-Entity-Ref-ID': `meeting-${bookedSlot.id}`,
+            },
             html: `
               <!DOCTYPE html>
               <html>
@@ -109,8 +113,12 @@ export default async function handler(req, res) {
                 </div>
                 <p>I look forward to speaking with you!</p>
                 <p>Best regards,<br><strong>Zohaib Cheema</strong></p>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-                <p style="color: #666; font-size: 12px;">If you have any questions, please reply to this email.</p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                  <p style="margin: 5px 0; color: #333; font-size: 14px;"><strong>Zohaib Cheema</strong></p>
+                  <p style="margin: 5px 0; color: #666; font-size: 13px;"><a href="mailto:${yourEmail}" style="color: #0066ff; text-decoration: none;">${yourEmail}</a></p>
+                  <p style="margin: 5px 0; color: #666; font-size: 13px;"><a href="${linkedinUrl}" style="color: #0066ff; text-decoration: none;">LinkedIn Profile</a></p>
+                </div>
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">If you have any questions, please reply to this email.</p>
               </body>
               </html>
             `,
@@ -122,9 +130,11 @@ export default async function handler(req, res) {
           emailErrors.push(errorMsg);
         }
 
-        // Send notification to Zohaib
-        const yourEmail = process.env.YOUR_EMAIL || 'zohaib.s.cheema9@gmail.com';
+        // Send notification to Zohaib - send this separately and ensure it's sent
         try {
+          console.log(`[NOTIFICATION EMAIL] Preparing to send to: ${yourEmail}`);
+          console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${name}, Email: ${email}, Date: ${formattedDate}, Time: ${formattedTime}`);
+          
           const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${name}\nEmail: ${email}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
 
           const yourEmailResult = await resend.emails.send({
@@ -133,6 +143,9 @@ export default async function handler(req, res) {
             to: yourEmail,
             subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
             text: plainText,
+            headers: {
+              'X-Entity-Ref-ID': `notification-${bookedSlot.id}`,
+            },
             html: `
               <!DOCTYPE html>
               <html>
@@ -161,11 +174,29 @@ export default async function handler(req, res) {
               </html>
             `,
           });
-          console.log('Notification email sent successfully to Zohaib:', JSON.stringify(yourEmailResult, null, 2));
+          console.log('[NOTIFICATION EMAIL] Successfully sent to Zohaib');
+          console.log('[NOTIFICATION EMAIL] Response:', JSON.stringify(yourEmailResult, null, 2));
+          console.log(`[NOTIFICATION EMAIL] Email ID: ${yourEmailResult?.id || 'N/A'}`);
+          console.log(`[NOTIFICATION EMAIL] To: ${yourEmail}`);
         } catch (yourEmailError) {
           const errorMsg = `Error sending notification email to Zohaib (${yourEmail}): ${yourEmailError.message || yourEmailError}`;
-          console.error(errorMsg, yourEmailError);
+          console.error('[NOTIFICATION EMAIL] ERROR:', errorMsg);
+          console.error('[NOTIFICATION EMAIL] Full error:', JSON.stringify(yourEmailError, null, 2));
           emailErrors.push(errorMsg);
+          
+          // Try to send a simple fallback email
+          try {
+            console.log('[NOTIFICATION EMAIL] Attempting fallback email...');
+            await resend.emails.send({
+              from: `Portfolio Bot <${fromEmail}>`,
+              to: yourEmail,
+              subject: `Meeting Booking Alert - ${name}`,
+              text: `Meeting booked: ${name} (${email}) on ${formattedDate} at ${formattedTime}`,
+            });
+            console.log('[NOTIFICATION EMAIL] Fallback email sent successfully');
+          } catch (fallbackError) {
+            console.error('[NOTIFICATION EMAIL] Fallback email also failed:', fallbackError);
+          }
         }
       } catch (emailError) {
         const errorMsg = `General email error: ${emailError.message || emailError}`;
