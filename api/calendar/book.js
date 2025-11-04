@@ -77,28 +77,42 @@ export default async function handler(req, res) {
 
         // Send confirmation to the attendee
         try {
+          const yourEmail = process.env.YOUR_EMAIL || 'zohaib.s.cheema9@gmail.com';
+          const plainText = `Hi ${name},\n\nYour meeting with Zohaib has been confirmed:\n\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}\n\nI look forward to speaking with you!\n\nBest regards,\nZohaib Cheema`;
+
           const attendeeResult = await resend.emails.send({
             from: `Zohaib Cheema <${fromEmail}>`,
+            replyTo: yourEmail,
             to: email,
             subject: `Meeting Confirmed: ${formattedDate} at ${formattedTime}`,
+            text: plainText,
             html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #333;">Meeting Confirmed!</h2>
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              </head>
+              <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333; border-bottom: 2px solid #0066ff; padding-bottom: 10px;">Meeting Confirmed!</h2>
                 <p>Hi ${name},</p>
                 <p>Your meeting with Zohaib has been confirmed:</p>
-                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <p><strong>Date:</strong> ${formattedDate}</p>
-                  <p><strong>Time:</strong> ${formattedTime}</p>
-                  <p><strong>Type:</strong> ${meetingType}</p>
-                  ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0066ff;">
+                  <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
+                  <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
+                  <p style="margin: 8px 0;"><strong>Type:</strong> ${meetingType}</p>
+                  ${notes ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notes}</p>` : ''}
                   ${zoomLink ? `
-                    <p style="margin-top: 15px;"><strong>Zoom Link:</strong></p>
-                    <p><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all;">${zoomLink}</a></p>
+                    <p style="margin-top: 15px; margin-bottom: 8px;"><strong>Zoom Link:</strong></p>
+                    <p style="margin: 8px 0;"><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all; font-weight: bold;">${zoomLink}</a></p>
                   ` : ''}
                 </div>
-                <p>We look forward to speaking with you!</p>
-                <p>Best regards,<br>Zohaib Cheema</p>
-              </div>
+                <p>I look forward to speaking with you!</p>
+                <p>Best regards,<br><strong>Zohaib Cheema</strong></p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                <p style="color: #666; font-size: 12px;">If you have any questions, please reply to this email.</p>
+              </body>
+              </html>
             `,
           });
           console.log('Attendee email sent successfully:', attendeeResult);
@@ -111,31 +125,43 @@ export default async function handler(req, res) {
         // Send notification to Zohaib
         const yourEmail = process.env.YOUR_EMAIL || 'zohaib.s.cheema9@gmail.com';
         try {
+          const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${name}\nEmail: ${email}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
+
           const yourEmailResult = await resend.emails.send({
             from: `Portfolio Bot <${fromEmail}>`,
+            replyTo: email,
             to: yourEmail,
             subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
+            text: plainText,
             html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h2 style="color: #333;">New Meeting Booking</h2>
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              </head>
+              <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333; border-bottom: 2px solid #0066ff; padding-bottom: 10px;">New Meeting Booking</h2>
                 <p>Hi Zohaib,</p>
                 <p>Someone has booked a meeting with you:</p>
-                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <p><strong>Name:</strong> ${name}</p>
-                  <p><strong>Email:</strong> ${email}</p>
-                  <p><strong>Date:</strong> ${formattedDate}</p>
-                  <p><strong>Time:</strong> ${formattedTime}</p>
-                  <p><strong>Type:</strong> ${meetingType}</p>
-                  ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ''}
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0066ff;">
+                  <p style="margin: 8px 0;"><strong>Name:</strong> ${name}</p>
+                  <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #0066ff; text-decoration: none;">${email}</a></p>
+                  <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
+                  <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
+                  <p style="margin: 8px 0;"><strong>Type:</strong> ${meetingType}</p>
+                  ${notes ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notes}</p>` : ''}
                   ${zoomLink ? `
-                    <p style="margin-top: 15px;"><strong>Zoom Link:</strong></p>
-                    <p><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all;">${zoomLink}</a></p>
+                    <p style="margin-top: 15px; margin-bottom: 8px;"><strong>Zoom Link:</strong></p>
+                    <p style="margin: 8px 0;"><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all; font-weight: bold;">${zoomLink}</a></p>
                   ` : ''}
                 </div>
-              </div>
+                <p style="color: #666; font-size: 12px;">You can reply directly to this email to contact ${name}.</p>
+              </body>
+              </html>
             `,
           });
-          console.log('Notification email sent successfully to Zohaib:', yourEmailResult);
+          console.log('Notification email sent successfully to Zohaib:', JSON.stringify(yourEmailResult, null, 2));
         } catch (yourEmailError) {
           const errorMsg = `Error sending notification email to Zohaib (${yourEmail}): ${yourEmailError.message || yourEmailError}`;
           console.error(errorMsg, yourEmailError);
