@@ -136,7 +136,8 @@ function generateRandomSlotsForDay(date) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+  // Allow both GET (for manual browser trigger) and POST (for cron/API calls)
+  if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
@@ -145,8 +146,41 @@ export default async function handler(req, res) {
     today.setHours(0, 0, 0, 0);
     
     const workDays = getNext14WorkDays(today);
+    
+    // DELETE OLD SLOTS FIRST - before generating new ones
+    const workDayDates = workDays.map(d => {
+      const year = d.getFullYear();
+      const month = d.getMonth() + 1;
+      const day = d.getDate();
+      return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    });
+    
+    // Delete all slots for these dates (will be regenerated with correct times)
+    for (const dateStr of workDayDates) {
+      await sql`DELETE FROM slots WHERE date = ${dateStr}`;
+    }
+    
+    // Delete ANY slots with times outside 11:00-17:00 (11am-5pm EST) - this catches all old invalid slots
+    await sql`
+      DELETE FROM slots 
+      WHERE time < '11:00' OR time >= '17:00'
+    `;
+    
+    // Delete any dates that have more than 3 slots
+    await sql`
+      DELETE FROM slots
+      WHERE date IN (
+        SELECT date FROM slots
+        GROUP BY date
+        HAVING COUNT(*) > 3
+      )
+    `;
+    
+    // Also remove old slots (past dates)
+    await sql`DELETE FROM slots WHERE date < CURRENT_DATE`;
+    
+    // NOW generate new slots
     const allSlots = [];
-
     workDays.forEach(date => {
       const slotsForDay = generateRandomSlotsForDay(date);
       allSlots.push(...slotsForDay);
@@ -168,39 +202,6 @@ export default async function handler(req, res) {
         }
       }
     }
-
-    // Delete ALL existing slots for work days to ensure clean regeneration
-    // This removes any old invalid slots
-    const workDayDates = workDays.map(d => {
-      const year = d.getFullYear();
-      const month = d.getMonth() + 1;
-      const day = d.getDate();
-      return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    });
-    
-    // Delete all slots for these dates (will be regenerated with correct times)
-    for (const dateStr of workDayDates) {
-      await sql`DELETE FROM slots WHERE date = ${dateStr}`;
-    }
-    
-    // Also remove old slots (past dates)
-    await sql`DELETE FROM slots WHERE date < CURRENT_DATE`;
-    
-    // Delete ANY slots with times outside 11:00-17:00 (11am-5pm EST) - this catches all old invalid slots
-    await sql`
-      DELETE FROM slots 
-      WHERE time < '11:00' OR time >= '17:00'
-    `;
-    
-    // Delete any dates that have more than 3 slots
-    await sql`
-      DELETE FROM slots
-      WHERE date IN (
-        SELECT date FROM slots
-        GROUP BY date
-        HAVING COUNT(*) > 3
-      )
-    `;
 
     return res.status(200).json({
       success: true,
