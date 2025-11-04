@@ -19,6 +19,24 @@ const Calendar = () => {
 
   useEffect(() => {
     fetchSlots();
+    
+    // Check for pre-filled data from chatbot
+    try {
+      const prefillData = sessionStorage.getItem('bookingPrefills');
+      if (prefillData) {
+        const data = JSON.parse(prefillData);
+        setBookingForm(prev => ({
+          ...prev,
+          name: data.name || prev.name,
+          email: data.email || prev.email,
+          meetingType: data.meetingType || prev.meetingType,
+        }));
+        // Clear the stored data after using it
+        sessionStorage.removeItem('bookingPrefills');
+      }
+    } catch (error) {
+      console.error('Error reading prefill data:', error);
+    }
   }, []);
 
   const fetchSlots = async () => {

@@ -1,21 +1,32 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaComments, FaTimes, FaPaperPlane, FaCalendar, FaFilePdf, FaComment } from 'react-icons/fa';
+import { FaComments, FaTimes, FaPaperPlane, FaCalendar, FaFilePdf, FaComment, FaExternalLinkAlt } from 'react-icons/fa';
 import { validateProfessionalEmail } from '../utils/emailValidation';
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
-  const [conversationState, setConversationState] = useState('idle'); // idle, resume_request, meeting_request, feedback
+  const [conversationState, setConversationState] = useState('idle'); // idle, resume_firstname, resume_lastname, resume_email, meeting_firstname, meeting_lastname, meeting_email, meeting_type
   const [collectedData, setCollectedData] = useState({});
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Initialize with welcome message
+  // Initialize with welcome message and quick actions
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      addMessage('bot', "Hi! I'm here to help you connect with Zohaib. How can I assist you today? You can request his resume or schedule a meeting.");
+      addMessage('bot', "Hi! I'm here to help you connect with Zohaib. What would you like to do?");
+      addMessage('bot', '', { showQuickActions: true });
+    }
+  }, [isOpen]);
+
+  // Reset when chat is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setMessages([]);
+      setConversationState('idle');
+      setCollectedData({});
+      setInputValue('');
     }
   }, [isOpen]);
 
@@ -26,31 +37,73 @@ const Chatbot = () => {
 
   // Focus input when chat opens
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if (isOpen && inputRef.current && conversationState !== 'idle') {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isOpen, conversationState]);
 
   const addMessage = (sender, text, options = {}) => {
     setMessages(prev => [...prev, { sender, text, id: Date.now(), ...options }]);
   };
 
   const handleResumeRequest = () => {
-    setConversationState('resume_request');
-    addMessage('bot', "I'd be happy to send you Zohaib's resume. To make sure it reaches the right place, I'll need your professional email address. What email should I use?");
+    setConversationState('resume_firstname');
+    setCollectedData({ type: 'resume' });
+    addMessage('user', 'Request Resume');
+    addMessage('bot', "Great! I'd be happy to share Zohaib's resume with you. To ensure it reaches the right contact, I'll need a few details from you.");
+    addMessage('bot', "Let's start with your first name. What's your first name?");
   };
 
   const handleMeetingRequest = () => {
-    setConversationState('meeting_request');
-    addMessage('bot', "Great! I can help you schedule a meeting with Zohaib. Are you looking for a mentorship session, or something else?");
-    addMessage('bot', "You can choose: Mentorship, Career Discussion, Interview Prep, or Other.", { isOptions: true });
+    setConversationState('meeting_firstname');
+    setCollectedData({ type: 'meeting' });
+    addMessage('user', 'Schedule Meeting');
+    addMessage('bot', "Perfect! I can help you schedule a meeting with Zohaib. Let me collect a few details to get you set up.");
+    addMessage('bot', "Let's start with your first name. What's your first name?");
+  };
+
+  const handleFirstName = (firstName) => {
+    if (!firstName.trim()) {
+      addMessage('bot', "Please provide your first name.");
+      return;
+    }
+    setCollectedData(prev => ({ ...prev, firstName: firstName.trim() }));
+    addMessage('user', firstName.trim());
+    
+    if (collectedData.type === 'resume') {
+      setConversationState('resume_lastname');
+      addMessage('bot', `Nice to meet you, ${firstName.trim()}! What's your last name?`);
+    } else {
+      setConversationState('meeting_lastname');
+      addMessage('bot', `Nice to meet you, ${firstName.trim()}! What's your last name?`);
+    }
+  };
+
+  const handleLastName = (lastName) => {
+    if (!lastName.trim()) {
+      addMessage('bot', "Please provide your last name.");
+      return;
+    }
+    setCollectedData(prev => ({ ...prev, lastName: lastName.trim() }));
+    addMessage('user', lastName.trim());
+    
+    if (collectedData.type === 'resume') {
+      setConversationState('resume_email');
+      addMessage('bot', `Thanks, ${collectedData.firstName} ${lastName.trim()}! Now I'll need your professional email address. This helps ensure Zohaib's resume reaches the right contacts for talent acquisition and recruitment purposes.`);
+      addMessage('bot', "What's your professional email address? (e.g., name@company.com or name@company.edu)");
+    } else {
+      setConversationState('meeting_request');
+      addMessage('bot', `Thanks, ${collectedData.firstName} ${lastName.trim()}! What type of meeting are you interested in?`);
+      addMessage('bot', "You can choose: Mentorship, Career Discussion, Interview Prep, or Other.", { isOptions: true });
+    }
   };
 
   const handleMeetingTypeSelected = (type) => {
     setCollectedData(prev => ({ ...prev, meetingType: type }));
     setConversationState('meeting_email');
     addMessage('user', type);
-    addMessage('bot', `Perfect! To send you the calendar link, I'll need your professional email. What email should I use?`);
+    addMessage('bot', `Perfect! A ${type} meeting sounds great. Now I'll need your professional email address to send you the calendar link.`);
+    addMessage('bot', "What's your professional email address? (e.g., name@company.com or name@company.edu)");
   };
 
   const handleResumeEmailSubmit = async (email) => {
@@ -62,7 +115,7 @@ const Chatbot = () => {
     }
 
     addMessage('user', email);
-    addMessage('bot', `Perfect! I'll send the resume to ${email}. It should arrive shortly in your inbox.`, { isProcessing: true });
+    addMessage('bot', `Perfect! I've got all the information I need, ${collectedData.firstName}.`, { isProcessing: true });
 
     try {
       const response = await fetch('/api/resume/request', {
@@ -79,7 +132,7 @@ const Chatbot = () => {
       const data = await response.json();
 
       if (data.success) {
-        addMessage('bot', 'Resume request submitted! I\'ve sent a notification to Zohaib. You\'ll receive an email once it\'s approved. Is there anything else I can help you with?');
+        addMessage('bot', `Resume request submitted! I've sent a notification to Zohaib. You'll receive an email once it's approved. Is there anything else I can help you with?`);
         setConversationState('idle');
         setCollectedData({});
       } else {
@@ -91,7 +144,7 @@ const Chatbot = () => {
     }
   };
 
-  const handleMeetingEmailSubmit = async (email) => {
+  const handleMeetingEmailSubmit = (email) => {
     const validation = validateProfessionalEmail(email);
     
     if (!validation.valid) {
@@ -101,20 +154,32 @@ const Chatbot = () => {
 
     setCollectedData(prev => ({ ...prev, email }));
     addMessage('user', email);
-    addMessage('bot', 'Perfect! Let me open the scheduling calendar for you. You can see available time slots and book a meeting.');
+    addMessage('bot', `Perfect! I have all your information, ${collectedData.firstName}.`);
+    addMessage('bot', `Click the button below to open the calendar page where you can view available time slots and book your ${collectedData.meetingType} meeting.`, { showCalendarButton: true });
+    setConversationState('idle');
+  };
+
+  const handleOpenCalendar = () => {
+    // Open calendar in new tab with pre-filled data in URL or localStorage
+    const calendarUrl = '/calendar';
+    const dataToPass = {
+      name: `${collectedData.firstName} ${collectedData.lastName}`,
+      email: collectedData.email,
+      meetingType: collectedData.meetingType,
+    };
     
-    // Redirect to calendar page
-    setTimeout(() => {
-      window.location.href = '/calendar';
-    }, 1500);
+    // Store in sessionStorage for the calendar page to pick up
+    sessionStorage.setItem('bookingPrefills', JSON.stringify(dataToPass));
+    
+    window.open(calendarUrl, '_blank');
+    addMessage('bot', "I've opened the calendar in a new tab. You can select an available time slot and complete your booking there. Is there anything else I can help you with?");
+    setConversationState('idle');
+    setCollectedData({});
   };
 
   const handleFeedbackClick = () => {
     setIsOpen(false);
-    // Open feedback modal or redirect to feedback page
-    // For now, we'll show an alert - can be replaced with a modal component
-    const feedbackUrl = '/feedback';
-    window.location.href = feedbackUrl;
+    window.open('/feedback', '_blank');
   };
 
   const handleSendMessage = () => {
@@ -123,40 +188,49 @@ const Chatbot = () => {
     const userMessage = inputValue.trim();
     setInputValue('');
 
-    if (conversationState === 'resume_request') {
-      handleResumeEmailSubmit(userMessage);
-    } else if (conversationState === 'meeting_email') {
-      handleMeetingEmailSubmit(userMessage);
-    } else if (conversationState === 'meeting_request') {
-      // Handle meeting type selection
-      const type = userMessage.toLowerCase();
-      if (type.includes('mentorship') || type.includes('mentor')) {
-        handleMeetingTypeSelected('Mentorship');
-      } else if (type.includes('career')) {
-        handleMeetingTypeSelected('Career Discussion');
-      } else if (type.includes('interview')) {
-        handleMeetingTypeSelected('Interview Prep');
-      } else {
-        handleMeetingTypeSelected('Other');
-      }
-    } else {
-      // Handle general queries
-      addMessage('user', userMessage);
-      if (userMessage.toLowerCase().includes('resume') || userMessage.toLowerCase().includes('cv')) {
-        handleResumeRequest();
-      } else if (userMessage.toLowerCase().includes('meeting') || userMessage.toLowerCase().includes('schedule') || userMessage.toLowerCase().includes('book')) {
-        handleMeetingRequest();
-      } else {
-        addMessage('bot', "I can help you request Zohaib's resume or schedule a meeting. What would you like to do?");
-      }
-    }
-  };
-
-  const handleQuickAction = (action) => {
-    if (action === 'resume') {
-      handleResumeRequest();
-    } else if (action === 'meeting') {
-      handleMeetingRequest();
+    switch (conversationState) {
+      case 'resume_firstname':
+        handleFirstName(userMessage);
+        break;
+      case 'resume_lastname':
+        handleLastName(userMessage);
+        break;
+      case 'resume_email':
+        handleResumeEmailSubmit(userMessage);
+        break;
+      case 'meeting_firstname':
+        handleFirstName(userMessage);
+        break;
+      case 'meeting_lastname':
+        handleLastName(userMessage);
+        break;
+      case 'meeting_email':
+        handleMeetingEmailSubmit(userMessage);
+        break;
+      case 'meeting_request':
+        // Handle meeting type selection via text
+        const type = userMessage.toLowerCase();
+        if (type.includes('mentorship') || type.includes('mentor')) {
+          handleMeetingTypeSelected('Mentorship');
+        } else if (type.includes('career')) {
+          handleMeetingTypeSelected('Career Discussion');
+        } else if (type.includes('interview')) {
+          handleMeetingTypeSelected('Interview Prep');
+        } else {
+          handleMeetingTypeSelected('Other');
+        }
+        break;
+      default:
+        // Handle general queries
+        addMessage('user', userMessage);
+        if (userMessage.toLowerCase().includes('resume') || userMessage.toLowerCase().includes('cv')) {
+          handleResumeRequest();
+        } else if (userMessage.toLowerCase().includes('meeting') || userMessage.toLowerCase().includes('schedule') || userMessage.toLowerCase().includes('book')) {
+          handleMeetingRequest();
+        } else {
+          addMessage('bot', "I can help you request Zohaib's resume or schedule a meeting. What would you like to do?");
+          addMessage('bot', '', { showQuickActions: true });
+        }
     }
   };
 
@@ -217,7 +291,7 @@ const Chatbot = () => {
                         : 'bg-neutral-800 text-neutral-200'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                    {message.text && <p className="text-sm whitespace-pre-wrap">{message.text}</p>}
                     {message.isProcessing && (
                       <div className="flex gap-1 mt-2">
                         <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -238,29 +312,36 @@ const Chatbot = () => {
                         ))}
                       </div>
                     )}
+                    {message.showQuickActions && (
+                      <div className="mt-3 space-y-2">
+                        <button
+                          onClick={handleResumeRequest}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/30 hover:to-purple-500/30 border border-pink-500/30 rounded-lg text-sm font-medium text-white transition-all"
+                        >
+                          <FaFilePdf /> Request Resume (HR/Talent Acquisition)
+                        </button>
+                        <button
+                          onClick={handleMeetingRequest}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500/20 to-purple-500/20 hover:from-pink-500/30 hover:to-purple-500/30 border border-pink-500/30 rounded-lg text-sm font-medium text-white transition-all"
+                        >
+                          <FaCalendar /> Schedule a Meeting
+                        </button>
+                      </div>
+                    )}
+                    {message.showCalendarButton && (
+                      <button
+                        onClick={handleOpenCalendar}
+                        className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-purple-500 hover:opacity-90 rounded-lg text-sm font-medium text-white transition-opacity"
+                      >
+                        <FaCalendar /> Open Calendar
+                        <FaExternalLinkAlt className="text-xs" />
+                      </button>
+                    )}
                   </div>
                 </motion.div>
               ))}
               <div ref={messagesEndRef} />
             </div>
-
-            {/* Quick Actions */}
-            {conversationState === 'idle' && messages.length > 1 && (
-              <div className="px-4 py-2 border-t border-neutral-700 flex gap-2">
-                <button
-                  onClick={() => handleQuickAction('resume')}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-sm text-neutral-200 transition-colors"
-                >
-                  <FaFilePdf /> Resume
-                </button>
-                <button
-                  onClick={() => handleQuickAction('meeting')}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-sm text-neutral-200 transition-colors"
-                >
-                  <FaCalendar /> Schedule
-                </button>
-              </div>
-            )}
 
             {/* Feedback Link */}
             <div className="px-4 py-2 border-t border-neutral-700">
@@ -280,7 +361,7 @@ const Chatbot = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Type your message..."
+                placeholder={conversationState === 'idle' ? "Type your message..." : "Type your response..."}
                 className="flex-1 bg-neutral-800 text-neutral-200 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
               />
               <button
@@ -299,4 +380,3 @@ const Chatbot = () => {
 };
 
 export default Chatbot;
-
