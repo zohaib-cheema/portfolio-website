@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { FaCalendarCheck, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { format, parseISO, startOfWeek, addWeeks, addDays, isSameDay, isSameMonth, startOfMonth, endOfMonth, eachWeekOfInterval, getDay } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
-import { validateProfessionalEmail } from '../utils/emailValidation';
 
 const Calendar = () => {
   const [slots, setSlots] = useState([]);
@@ -130,9 +129,10 @@ const Calendar = () => {
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
 
-    const emailValidation = validateProfessionalEmail(bookingForm.email);
-    if (!emailValidation.valid) {
-      alert(emailValidation.message);
+    // Basic email format validation (any email is fine for meetings)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(bookingForm.email)) {
+      alert('Please enter a valid email address.');
       return;
     }
 
@@ -281,7 +281,7 @@ const Calendar = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-neutral-300 mb-2">
-                    Professional Email *
+                    Email *
                   </label>
                   <input
                     type="email"
@@ -289,11 +289,8 @@ const Calendar = () => {
                     value={bookingForm.email}
                     onChange={(e) => setBookingForm(prev => ({ ...prev, email: e.target.value }))}
                     className="w-full bg-neutral-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                    placeholder="name@company.com"
+                    placeholder="your@email.com"
                   />
-                  <p className="text-xs text-neutral-400 mt-1">
-                    Please use a professional email address
-                  </p>
                 </div>
 
                 <div>

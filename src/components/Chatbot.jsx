@@ -152,8 +152,8 @@ const Chatbot = () => {
     }
 
     setConversationState('meeting_email');
-    addMessage('bot', "Now I'll need your professional email address to send you the calendar link.");
-    addMessage('bot', "What's your professional email address? (e.g., name@company.com or name@company.edu)");
+    addMessage('bot', "Now I'll need your email address to send you the calendar link.");
+    addMessage('bot', "What's your email address?");
   };
 
   const handleResumeEmailSubmit = async (email) => {
@@ -195,10 +195,10 @@ const Chatbot = () => {
   };
 
   const handleMeetingEmailSubmit = (email) => {
-    const validation = validateProfessionalEmail(email);
-    
-    if (!validation.valid) {
-      addMessage('bot', validation.message);
+    // Basic email format validation for meetings (any email is fine)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      addMessage('bot', 'Please enter a valid email address.');
       return;
     }
 
