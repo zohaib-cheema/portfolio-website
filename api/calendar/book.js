@@ -23,42 +23,20 @@ export default async function handler(req, res) {
   try {
     const { slotId, name, email, meetingType, notes } = req.body;
 
-    // Validate required fields (check for empty strings too)
+    // Validate required fields
     if (!slotId || !name || !email || !meetingType) {
-      console.error('[BOOKING API] Missing required fields:', { slotId: !!slotId, name: !!name, email: !!email, meetingType: !!meetingType });
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Trim and validate non-empty strings
-    const trimmedName = name?.trim();
-    const trimmedEmail = email?.trim();
-    const trimmedMeetingType = meetingType?.trim();
-
-    if (!trimmedName || !trimmedEmail || !trimmedMeetingType) {
-      console.error('[BOOKING API] Empty required fields after trim:', { name: trimmedName, email: trimmedEmail, meetingType: trimmedMeetingType });
-      return res.status(400).json({ error: 'Required fields cannot be empty' });
-    }
-
     // Atomic database operation - only update if still available
-    // Handle null notes properly for SQL template literal
-    const notesValue = notes && typeof notes === 'string' && notes.trim() ? notes.trim() : null;
-    
-    console.log('[BOOKING API] Attempting to book slot:', { 
-      slotId, 
-      name: trimmedName, 
-      email: trimmedEmail, 
-      meetingType: trimmedMeetingType,
-      hasNotes: !!notesValue 
-    });
-    
     const result = await sql`
       UPDATE slots 
       SET 
         available = false,
-        booked_by = ${trimmedName},
-        booked_email = ${trimmedEmail},
-        meeting_type = ${trimmedMeetingType},
-        notes = ${notesValue},
+        booked_by = ${name},
+        booked_email = ${email},
+        meeting_type = ${meetingType},
+        notes = ${notes || null},
         booked_at = NOW()
       WHERE id = ${slotId} AND available = true
       RETURNING 
@@ -68,11 +46,6 @@ export default async function handler(req, res) {
         datetime,
         meeting_type as "meetingType"
     `;
-    
-    console.log('[BOOKING API] SQL query result:', { 
-      rowCount: result.rows.length,
-      slotId: result.rows[0]?.id 
-    });
 
     if (result.rows.length === 0) {
       return res.status(409).json({ error: 'This slot has already been booked or does not exist' });
@@ -111,11 +84,77 @@ export default async function handler(req, res) {
         // For testing, use: onboarding@resend.dev (works without domain verification)
         const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
-        // NOTE: Resend free tier only allows sending to account owner's email
-        // We cannot send confirmation emails to attendees without domain verification
-        // Users should add the meeting to their Google Calendar which includes all details
-        console.log('[ATTENDEE EMAIL] Skipping attendee email - Resend free tier restriction');
-        console.log('[ATTENDEE EMAIL] Attendee should add meeting to Google Calendar for confirmation');
+        // Send confirmation to the attendee
+        try {
+          const plainText = `Hi ${name},\n\nYour meeting with Zohaib has been confirmed:\n\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}\n\nI look forward to speaking with you!\n\nBest regards,\nZohaib Cheema\nEmail: ${yourEmail}\nLinkedIn: ${linkedinUrl}`;
+
+          const attendeeResult = await resend.emails.send({
+            from: `Zohaib Cheema <${fromEmail}>`,
+            replyTo: yourEmail,
+            to: email,
+            subject: `Meeting Confirmed - ${formattedDate} at ${formattedTime}`,
+            text: plainText,
+            headers: {
+              'X-Entity-Ref-ID': `meeting-${bookedSlot.id}`,
+            },
+            html: `
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              </head>
+              <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333; border-bottom: 2px solid #0066ff; padding-bottom: 10px;">Meeting Confirmed!</h2>
+                <p>Hi ${name},</p>
+                <p>Your meeting with Zohaib has been confirmed:</p>
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0066ff;">
+                  <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
+                  <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
+                  <p style="margin: 8px 0;"><strong>Type:</strong> ${meetingType}</p>
+                  ${notes ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notes}</p>` : ''}
+                  ${zoomLink ? `
+                    <p style="margin-top: 15px; margin-bottom: 8px;"><strong>Zoom Link:</strong></p>
+                    <p style="margin: 8px 0;"><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all; font-weight: bold;">${zoomLink}</a></p>
+                  ` : ''}
+                </div>
+                <p>I look forward to speaking with you!</p>
+                <p>Best regards,<br><strong>Zohaib Cheema</strong></p>
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                  <p style="margin: 5px 0; color: #333; font-size: 14px;"><strong>Zohaib Cheema</strong></p>
+                  <p style="margin: 5px 0; color: #666; font-size: 13px;"><a href="mailto:${yourEmail}" style="color: #0066ff; text-decoration: none;">${yourEmail}</a></p>
+                  <p style="margin: 5px 0; color: #666; font-size: 13px;"><a href="${linkedinUrl}" style="color: #0066ff; text-decoration: none;">LinkedIn Profile</a></p>
+                </div>
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">If you have any questions, please reply to this email.</p>
+              </body>
+              </html>
+            `,
+          });
+          // Check multiple possible response structures
+          const attendeeEmailId = attendeeResult?.id || attendeeResult?.data?.id || attendeeResult?.data?.data?.id;
+          
+          if (!attendeeResult) {
+            throw new Error(`Empty response from Resend API`);
+          }
+          
+          if (!attendeeEmailId) {
+            console.warn('[ATTENDEE EMAIL] WARNING - No email ID in response structure');
+            console.warn('[ATTENDEE EMAIL] Full response:', JSON.stringify(attendeeResult, null, 2));
+          }
+          
+          console.log('[ATTENDEE EMAIL] SUCCESS - Email sent to attendee');
+          console.log('[ATTENDEE EMAIL] Response:', JSON.stringify(attendeeResult, null, 2));
+          if (attendeeEmailId) {
+            console.log(`[ATTENDEE EMAIL] Email ID: ${attendeeEmailId}`);
+          } else {
+            console.log(`[ATTENDEE EMAIL] Email ID: Not returned in response`);
+          }
+        } catch (attendeeEmailError) {
+          const errorMsg = `Error sending confirmation email to attendee (${email}): ${attendeeEmailError.message || attendeeEmailError}`;
+          console.error('[ATTENDEE EMAIL] ERROR:', errorMsg);
+          console.error('[ATTENDEE EMAIL] Full error:', JSON.stringify(attendeeEmailError, null, 2));
+          emailErrors.push(errorMsg);
+        }
 
         // Send notification to Zohaib
         // CRITICAL: Resend free tier ONLY allows sending to account owner's email
@@ -133,14 +172,14 @@ export default async function handler(req, res) {
             console.log(`[NOTIFICATION EMAIL] ==========================================`);
             console.log(`[NOTIFICATION EMAIL] Preparing to send to: ${notificationEmail}`);
             console.log(`[NOTIFICATION EMAIL] From email: ${fromEmail}`);
-            console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${trimmedName}, Email: ${trimmedEmail}, Date: ${formattedDate}, Time: ${formattedTime}`);
+            console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${name}, Email: ${email}, Date: ${formattedDate}, Time: ${formattedTime}`);
             console.log(`[NOTIFICATION EMAIL] Resend API Key present: ${!!process.env.RESEND_API_KEY}`);
             
-            const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${trimmedName}\nEmail: ${trimmedEmail}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${trimmedMeetingType}${notesValue ? `\nNotes: ${notesValue}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
+            const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${name}\nEmail: ${email}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
 
             const emailPayload = {
               from: `Portfolio Bot <${fromEmail}>`,
-              replyTo: trimmedEmail,
+              replyTo: email,
               to: notificationEmail,
               subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
               text: plainText,
@@ -159,18 +198,18 @@ export default async function handler(req, res) {
                 <p>Hi Zohaib,</p>
                 <p>Someone has booked a meeting with you:</p>
                 <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0066ff;">
-                  <p style="margin: 8px 0;"><strong>Name:</strong> ${trimmedName}</p>
-                  <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${trimmedEmail}" style="color: #0066ff; text-decoration: none;">${trimmedEmail}</a></p>
+                  <p style="margin: 8px 0;"><strong>Name:</strong> ${name}</p>
+                  <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #0066ff; text-decoration: none;">${email}</a></p>
                   <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
                   <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
-                  <p style="margin: 8px 0;"><strong>Type:</strong> ${trimmedMeetingType}</p>
-                  ${notesValue ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notesValue}</p>` : ''}
+                  <p style="margin: 8px 0;"><strong>Type:</strong> ${meetingType}</p>
+                  ${notes ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notes}</p>` : ''}
                   ${zoomLink ? `
                     <p style="margin-top: 15px; margin-bottom: 8px;"><strong>Zoom Link:</strong></p>
                     <p style="margin: 8px 0;"><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all; font-weight: bold;">${zoomLink}</a></p>
                   ` : ''}
                 </div>
-                <p style="color: #666; font-size: 12px;">You can reply directly to this email to contact ${trimmedName}.</p>
+                <p style="color: #666; font-size: 12px;">You can reply directly to this email to contact ${name}.</p>
               </body>
               </html>
             `,
@@ -223,8 +262,8 @@ export default async function handler(req, res) {
                 const fallbackResult = await resend.emails.send({
                   from: `Portfolio Bot <${fromEmail}>`,
                   to: resendAccountEmail,
-                  subject: `Meeting Booking Alert - ${trimmedName}`,
-                  text: `Meeting booked: ${trimmedName} (${trimmedEmail}) on ${formattedDate} at ${formattedTime}`,
+                  subject: `Meeting Booking Alert - ${name}`,
+                  text: `Meeting booked: ${name} (${email}) on ${formattedDate} at ${formattedTime}`,
                 });
                 const fallbackId = fallbackResult?.id || fallbackResult?.data?.id || fallbackResult?.data?.data?.id;
                 if (fallbackId) {
@@ -256,8 +295,7 @@ export default async function handler(req, res) {
         date: bookedSlot.date,
         time: bookedSlot.time,
         datetime: bookedSlot.datetime,
-        meetingType: bookedSlot.meetingType,
-        zoomLink: zoomLink || '' // Include zoom link in response for Google Calendar
+        meetingType: bookedSlot.meetingType
       }
     };
 
@@ -271,21 +309,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json(responseData);
   } catch (error) {
-    console.error('[BOOKING API] ==========================================');
-    console.error('[BOOKING API] ERROR booking slot:', error);
-    console.error('[BOOKING API] Error message:', error?.message);
-    console.error('[BOOKING API] Error stack:', error?.stack);
-    console.error('[BOOKING API] Request body:', JSON.stringify(req.body, null, 2));
-    console.error('[BOOKING API] ==========================================');
-    
-    // Return more detailed error for debugging
-    const errorMessage = error?.message || 'Unknown error occurred';
-    res.status(500).json({ 
-      error: 'Failed to book slot',
-      details: errorMessage,
-      // Only include details in development
-      ...(process.env.NODE_ENV === 'development' && { stack: error?.stack })
-    });
+    console.error('Error booking slot:', error);
+    res.status(500).json({ error: 'Failed to book slot' });
   }
 }
 
