@@ -23,20 +23,42 @@ export default async function handler(req, res) {
   try {
     const { slotId, name, email, meetingType, notes } = req.body;
 
-    // Validate required fields
+    // Validate required fields (check for empty strings too)
     if (!slotId || !name || !email || !meetingType) {
+      console.error('[BOOKING API] Missing required fields:', { slotId: !!slotId, name: !!name, email: !!email, meetingType: !!meetingType });
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+    // Trim and validate non-empty strings
+    const trimmedName = name?.trim();
+    const trimmedEmail = email?.trim();
+    const trimmedMeetingType = meetingType?.trim();
+
+    if (!trimmedName || !trimmedEmail || !trimmedMeetingType) {
+      console.error('[BOOKING API] Empty required fields after trim:', { name: trimmedName, email: trimmedEmail, meetingType: trimmedMeetingType });
+      return res.status(400).json({ error: 'Required fields cannot be empty' });
+    }
+
     // Atomic database operation - only update if still available
+    // Handle null notes properly for SQL template literal
+    const notesValue = notes && typeof notes === 'string' && notes.trim() ? notes.trim() : null;
+    
+    console.log('[BOOKING API] Attempting to book slot:', { 
+      slotId, 
+      name: trimmedName, 
+      email: trimmedEmail, 
+      meetingType: trimmedMeetingType,
+      hasNotes: !!notesValue 
+    });
+    
     const result = await sql`
       UPDATE slots 
       SET 
         available = false,
-        booked_by = ${name},
-        booked_email = ${email},
-        meeting_type = ${meetingType},
-        notes = ${notes || null},
+        booked_by = ${trimmedName},
+        booked_email = ${trimmedEmail},
+        meeting_type = ${trimmedMeetingType},
+        notes = ${notesValue},
         booked_at = NOW()
       WHERE id = ${slotId} AND available = true
       RETURNING 
@@ -46,6 +68,11 @@ export default async function handler(req, res) {
         datetime,
         meeting_type as "meetingType"
     `;
+    
+    console.log('[BOOKING API] SQL query result:', { 
+      rowCount: result.rows.length,
+      slotId: result.rows[0]?.id 
+    });
 
     if (result.rows.length === 0) {
       return res.status(409).json({ error: 'This slot has already been booked or does not exist' });
@@ -106,14 +133,14 @@ export default async function handler(req, res) {
             console.log(`[NOTIFICATION EMAIL] ==========================================`);
             console.log(`[NOTIFICATION EMAIL] Preparing to send to: ${notificationEmail}`);
             console.log(`[NOTIFICATION EMAIL] From email: ${fromEmail}`);
-            console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${name}, Email: ${email}, Date: ${formattedDate}, Time: ${formattedTime}`);
+            console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${trimmedName}, Email: ${trimmedEmail}, Date: ${formattedDate}, Time: ${formattedTime}`);
             console.log(`[NOTIFICATION EMAIL] Resend API Key present: ${!!process.env.RESEND_API_KEY}`);
             
-            const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${name}\nEmail: ${email}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
+            const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${trimmedName}\nEmail: ${trimmedEmail}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${trimmedMeetingType}${notesValue ? `\nNotes: ${notesValue}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
 
             const emailPayload = {
               from: `Portfolio Bot <${fromEmail}>`,
-              replyTo: email,
+              replyTo: trimmedEmail,
               to: notificationEmail,
               subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
               text: plainText,
@@ -132,18 +159,18 @@ export default async function handler(req, res) {
                 <p>Hi Zohaib,</p>
                 <p>Someone has booked a meeting with you:</p>
                 <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0066ff;">
-                  <p style="margin: 8px 0;"><strong>Name:</strong> ${name}</p>
-                  <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #0066ff; text-decoration: none;">${email}</a></p>
+                  <p style="margin: 8px 0;"><strong>Name:</strong> ${trimmedName}</p>
+                  <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${trimmedEmail}" style="color: #0066ff; text-decoration: none;">${trimmedEmail}</a></p>
                   <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
                   <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
-                  <p style="margin: 8px 0;"><strong>Type:</strong> ${meetingType}</p>
-                  ${notes ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notes}</p>` : ''}
+                  <p style="margin: 8px 0;"><strong>Type:</strong> ${trimmedMeetingType}</p>
+                  ${notesValue ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notesValue}</p>` : ''}
                   ${zoomLink ? `
                     <p style="margin-top: 15px; margin-bottom: 8px;"><strong>Zoom Link:</strong></p>
                     <p style="margin: 8px 0;"><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all; font-weight: bold;">${zoomLink}</a></p>
                   ` : ''}
                 </div>
-                <p style="color: #666; font-size: 12px;">You can reply directly to this email to contact ${name}.</p>
+                <p style="color: #666; font-size: 12px;">You can reply directly to this email to contact ${trimmedName}.</p>
               </body>
               </html>
             `,
@@ -196,8 +223,8 @@ export default async function handler(req, res) {
                 const fallbackResult = await resend.emails.send({
                   from: `Portfolio Bot <${fromEmail}>`,
                   to: resendAccountEmail,
-                  subject: `Meeting Booking Alert - ${name}`,
-                  text: `Meeting booked: ${name} (${email}) on ${formattedDate} at ${formattedTime}`,
+                  subject: `Meeting Booking Alert - ${trimmedName}`,
+                  text: `Meeting booked: ${trimmedName} (${trimmedEmail}) on ${formattedDate} at ${formattedTime}`,
                 });
                 const fallbackId = fallbackResult?.id || fallbackResult?.data?.id || fallbackResult?.data?.data?.id;
                 if (fallbackId) {
@@ -244,8 +271,21 @@ export default async function handler(req, res) {
 
     return res.status(200).json(responseData);
   } catch (error) {
-    console.error('Error booking slot:', error);
-    res.status(500).json({ error: 'Failed to book slot' });
+    console.error('[BOOKING API] ==========================================');
+    console.error('[BOOKING API] ERROR booking slot:', error);
+    console.error('[BOOKING API] Error message:', error?.message);
+    console.error('[BOOKING API] Error stack:', error?.stack);
+    console.error('[BOOKING API] Request body:', JSON.stringify(req.body, null, 2));
+    console.error('[BOOKING API] ==========================================');
+    
+    // Return more detailed error for debugging
+    const errorMessage = error?.message || 'Unknown error occurred';
+    res.status(500).json({ 
+      error: 'Failed to book slot',
+      details: errorMessage,
+      // Only include details in development
+      ...(process.env.NODE_ENV === 'development' && { stack: error?.stack })
+    });
   }
 }
 
