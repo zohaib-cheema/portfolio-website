@@ -295,8 +295,7 @@ export default async function handler(req, res) {
         date: bookedSlot.date,
         time: bookedSlot.time,
         datetime: bookedSlot.datetime,
-        meetingType: bookedSlot.meetingType,
-        zoomLink: zoomLink || '' // Include zoom link for Google Calendar
+        meetingType: bookedSlot.meetingType
       }
     };
 

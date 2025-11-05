@@ -164,7 +164,6 @@ const Calendar = () => {
           time: data.booking.time,
           datetime: data.booking.datetime,
           meetingType: data.booking.meetingType,
-          zoomLink: data.booking.zoomLink || '', // Include zoom link from booking response
         });
         setBookingSuccess(true);
         setTimeout(() => {
@@ -250,12 +249,12 @@ const Calendar = () => {
               </div>
             </div>
 
-            {/* Google Calendar Reminder */}
+            {/* Email Confirmation Notice */}
             <div className="bg-blue-500/20 border-2 border-blue-500/50 rounded-lg p-4 mb-6">
-              <p className="text-blue-200 font-semibold text-lg mb-2">📅 Add to Your Calendar</p>
+              <p className="text-blue-200 font-semibold text-lg mb-2">📧 Confirmation Email Sent</p>
               <p className="text-blue-100 text-sm">
-                Don't forget to add this meeting to your Google Calendar using the button below. 
-                This will help you remember the meeting time and includes all the meeting details.
+                A confirmation email has been sent to <strong>{bookingDetails.email}</strong>. 
+                You'll receive the Zoom link for the meeting shortly.
               </p>
             </div>
 
@@ -269,25 +268,18 @@ const Calendar = () => {
                 return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
               };
               
-              // Build Google Calendar description with Zoom link
-              let calendarDescription = `Meeting Type: ${bookingDetails.meetingType}`;
-              if (bookingDetails.notes) {
-                calendarDescription += `\n\nNotes: ${bookingDetails.notes}`;
-              }
-              if (bookingDetails.zoomLink) {
-                calendarDescription += `\n\nZoom Link: ${bookingDetails.zoomLink}`;
-              }
-              calendarDescription += `\n\nContact: zohaib.s.cheema9@gmail.com`;
-              
               const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
               googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
               googleCalendarUrl.searchParams.set('text', `Meeting with Zohaib - ${bookingDetails.meetingType}`);
               googleCalendarUrl.searchParams.set('dates', `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
-              googleCalendarUrl.searchParams.set('details', calendarDescription);
-              googleCalendarUrl.searchParams.set('location', bookingDetails.zoomLink || 'Zoom - Link will be sent via email');
+              googleCalendarUrl.searchParams.set('details', `Meeting Type: ${bookingDetails.meetingType}${bookingDetails.notes ? `\n\nNotes: ${bookingDetails.notes}` : ''}\n\nContact: zohaib.s.cheema9@gmail.com\n\nZoom link will be sent via email shortly.`);
+              googleCalendarUrl.searchParams.set('location', 'Zoom - Link will be sent via email');
               
               return (
                 <div className="mb-6">
+                  <p className="text-neutral-300 text-sm mb-3 text-center">
+                    Don't forget to add this meeting to your calendar:
+                  </p>
                   <a
                     href={googleCalendarUrl.toString()}
                     target="_blank"
