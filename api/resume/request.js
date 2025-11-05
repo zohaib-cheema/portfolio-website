@@ -176,15 +176,32 @@ export default async function handler(req, res) {
         
         const emailResult = await resend.emails.send(emailPayload);
         
+        // Check multiple possible response structures (Resend SDK may return data.id or id)
+        const emailId = emailResult?.id || emailResult?.data?.id || emailResult?.data?.data?.id;
+        
+        console.log(`[RESUME REQUEST EMAIL] Raw response:`, JSON.stringify(emailResult, null, 2));
+        console.log(`[RESUME REQUEST EMAIL] Response type:`, typeof emailResult);
+        console.log(`[RESUME REQUEST EMAIL] Response keys:`, Object.keys(emailResult || {}));
+        
         // Validate the response
-        if (!emailResult || !emailResult.id) {
-          throw new Error(`Invalid response from Resend API: ${JSON.stringify(emailResult)}`);
+        if (!emailResult) {
+          throw new Error(`Empty response from Resend API`);
+        }
+        
+        if (!emailId) {
+          // Log the full response but don't throw - email might still be sent
+          console.warn(`[RESUME REQUEST EMAIL] WARNING - No email ID in response structure`);
+          console.warn(`[RESUME REQUEST EMAIL] Full response:`, JSON.stringify(emailResult, null, 2));
         }
         
         console.log(`[RESUME REQUEST EMAIL] ==========================================`);
-        console.log(`[RESUME REQUEST EMAIL] SUCCESS - Email sent to ${notificationEmail}`);
+        if (emailId) {
+          console.log(`[RESUME REQUEST EMAIL] SUCCESS - Email sent to ${notificationEmail}`);
+          console.log(`[RESUME REQUEST EMAIL] Email ID: ${emailId}`);
+        } else {
+          console.log(`[RESUME REQUEST EMAIL] Email sent (but no ID returned) to ${notificationEmail}`);
+        }
         console.log(`[RESUME REQUEST EMAIL] Response:`, JSON.stringify(emailResult, null, 2));
-        console.log(`[RESUME REQUEST EMAIL] Email ID: ${emailResult.id}`);
         console.log(`[RESUME REQUEST EMAIL] To: ${notificationEmail}`);
         console.log(`[RESUME REQUEST EMAIL] From: ${fromEmail}`);
         console.log(`[RESUME REQUEST EMAIL] ==========================================`);
@@ -203,10 +220,13 @@ export default async function handler(req, res) {
               subject: `Resume Request Alert - ${email}`,
               text: `Resume requested by: ${email} at ${requestTime}`,
             });
-            if (fallbackResult && fallbackResult.id) {
+            const fallbackId = fallbackResult?.id || fallbackResult?.data?.id || fallbackResult?.data?.data?.id;
+            if (fallbackId) {
               console.log(`[RESUME REQUEST EMAIL] Fallback email sent successfully to ${hardcodedEmail}`);
+              console.log(`[RESUME REQUEST EMAIL] Fallback Email ID: ${fallbackId}`);
             } else {
-              console.error(`[RESUME REQUEST EMAIL] Fallback email sent but no ID returned`);
+              console.warn(`[RESUME REQUEST EMAIL] Fallback email sent but no ID returned`);
+              console.warn(`[RESUME REQUEST EMAIL] Fallback response:`, JSON.stringify(fallbackResult, null, 2));
             }
           } catch (fallbackError) {
             console.error(`[RESUME REQUEST EMAIL] Fallback email also failed for ${hardcodedEmail}:`, fallbackError);

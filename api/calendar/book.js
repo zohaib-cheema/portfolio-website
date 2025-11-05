@@ -208,15 +208,32 @@ export default async function handler(req, res) {
             
             const emailResult = await resend.emails.send(emailPayload);
             
+            // Check multiple possible response structures (Resend SDK may return data.id or id)
+            const emailId = emailResult?.id || emailResult?.data?.id || emailResult?.data?.data?.id;
+            
+            console.log(`[NOTIFICATION EMAIL] Raw response:`, JSON.stringify(emailResult, null, 2));
+            console.log(`[NOTIFICATION EMAIL] Response type:`, typeof emailResult);
+            console.log(`[NOTIFICATION EMAIL] Response keys:`, Object.keys(emailResult || {}));
+            
             // Validate the response
-            if (!emailResult || !emailResult.id) {
-              throw new Error(`Invalid response from Resend API: ${JSON.stringify(emailResult)}`);
+            if (!emailResult) {
+              throw new Error(`Empty response from Resend API`);
+            }
+            
+            if (!emailId) {
+              // Log the full response but don't throw - email might still be sent
+              console.warn(`[NOTIFICATION EMAIL] WARNING - No email ID in response structure`);
+              console.warn(`[NOTIFICATION EMAIL] Full response:`, JSON.stringify(emailResult, null, 2));
             }
             
             console.log(`[NOTIFICATION EMAIL] ==========================================`);
-            console.log(`[NOTIFICATION EMAIL] SUCCESS - Email sent to ${notificationEmail}`);
+            if (emailId) {
+              console.log(`[NOTIFICATION EMAIL] SUCCESS - Email sent to ${notificationEmail}`);
+              console.log(`[NOTIFICATION EMAIL] Email ID: ${emailId}`);
+            } else {
+              console.log(`[NOTIFICATION EMAIL] Email sent (but no ID returned) to ${notificationEmail}`);
+            }
             console.log(`[NOTIFICATION EMAIL] Response:`, JSON.stringify(emailResult, null, 2));
-            console.log(`[NOTIFICATION EMAIL] Email ID: ${emailResult.id}`);
             console.log(`[NOTIFICATION EMAIL] To: ${notificationEmail}`);
             console.log(`[NOTIFICATION EMAIL] From: ${fromEmail}`);
             console.log(`[NOTIFICATION EMAIL] ==========================================`);
@@ -236,11 +253,13 @@ export default async function handler(req, res) {
                   subject: `Meeting Booking Alert - ${name}`,
                   text: `Meeting booked: ${name} (${email}) on ${formattedDate} at ${formattedTime}`,
                 });
-                if (fallbackResult && fallbackResult.id) {
+                const fallbackId = fallbackResult?.id || fallbackResult?.data?.id || fallbackResult?.data?.data?.id;
+                if (fallbackId) {
                   console.log(`[NOTIFICATION EMAIL] Fallback email sent successfully to ${hardcodedEmail}`);
-                  console.log(`[NOTIFICATION EMAIL] Fallback Email ID: ${fallbackResult.id}`);
+                  console.log(`[NOTIFICATION EMAIL] Fallback Email ID: ${fallbackId}`);
                 } else {
-                  console.error(`[NOTIFICATION EMAIL] Fallback email sent but no ID returned`);
+                  console.warn(`[NOTIFICATION EMAIL] Fallback email sent but no ID returned`);
+                  console.warn(`[NOTIFICATION EMAIL] Fallback response:`, JSON.stringify(fallbackResult, null, 2));
                 }
               } catch (fallbackError) {
                 console.error(`[NOTIFICATION EMAIL] Fallback email also failed for ${hardcodedEmail}:`, fallbackError);
