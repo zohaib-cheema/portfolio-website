@@ -12,13 +12,26 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  // Function definitions (needed by useEffects)
+  const addMessage = (sender, text, options = {}) => {
+    setMessages(prev => [...prev, { sender, text, id: Date.now(), ...options }]);
+  };
+
+  const handleResumeRequest = () => {
+    setConversationState('resume_firstname');
+    setCollectedData({ type: 'resume' });
+    addMessage('user', 'Request Resume');
+    addMessage('bot', "Great! I'd be happy to share Zohaib's resume with you. To ensure it reaches the right contact, I'll need a few details from you.");
+    addMessage('bot', "Let's start with your first name. What's your first name?");
+  };
+
   // Initialize with welcome message and quick actions
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (isOpen && messages.length === 0 && conversationState === 'idle') {
       addMessage('bot', "Hi! I'm here to help you connect with Zohaib. What would you like to do?");
       addMessage('bot', '', { showQuickActions: true });
     }
-  }, [isOpen]);
+  }, [isOpen, conversationState, messages.length]);
 
   // Reset when chat is closed
   useEffect(() => {
@@ -42,17 +55,21 @@ const Chatbot = () => {
     }
   }, [isOpen, conversationState]);
 
-  const addMessage = (sender, text, options = {}) => {
-    setMessages(prev => [...prev, { sender, text, id: Date.now(), ...options }]);
-  };
+  // Listen for external trigger to open chatbot with resume request
+  useEffect(() => {
+    const handleOpenWithResume = () => {
+      setIsOpen(true);
+      // Small delay to ensure chatbot is open before triggering resume request
+      setTimeout(() => {
+        handleResumeRequest();
+      }, 100);
+    };
 
-  const handleResumeRequest = () => {
-    setConversationState('resume_firstname');
-    setCollectedData({ type: 'resume' });
-    addMessage('user', 'Request Resume');
-    addMessage('bot', "Great! I'd be happy to share Zohaib's resume with you. To ensure it reaches the right contact, I'll need a few details from you.");
-    addMessage('bot', "Let's start with your first name. What's your first name?");
-  };
+    window.addEventListener('openChatbotWithResume', handleOpenWithResume);
+    return () => {
+      window.removeEventListener('openChatbotWithResume', handleOpenWithResume);
+    };
+  }, []);
 
   const handleMeetingRequest = () => {
     setConversationState('meeting_firstname');

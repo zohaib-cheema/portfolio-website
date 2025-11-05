@@ -87,6 +87,23 @@ const Experience = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Request Resume Button */}
+      <motion.div
+        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="mt-12 flex justify-center"
+      >
+        <button
+          onClick={() => {
+            window.dispatchEvent(new CustomEvent('openChatbotWithResume'));
+          }}
+          className="px-6 py-3 rounded-full bg-gradient-to-r from-pink-400 via-slate-500 to-purple-500 text-white font-medium shadow-lg hover:scale-105 transition-transform duration-200"
+        >
+          Request Resume
+        </button>
+      </motion.div>
     </section>
   );
 };

@@ -20,7 +20,7 @@ export const EXPERIENCES = [
   },
   {
     year: "Dec 2024 – May 2025",
-    role: "AI/ML Engineer Intern",
+    role: "Software Engineer Intern",
     company: "iD Tech",
     logo: idtechLogo,
     description: `Taught 70+ students DSA in Python and AI chatbot development, and led workshops on building multi-agent GPT-3.5/Microsoft AutoGen chatbots to generate and debug Gurobi code for supply chain optimization.`,
