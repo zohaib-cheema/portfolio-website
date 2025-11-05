@@ -130,26 +130,36 @@ export default async function handler(req, res) {
           emailErrors.push(errorMsg);
         }
 
-        // Send notification to Zohaib - send this separately and ensure it's sent
-        // This is critical - we need to ensure this email is sent
-        try {
-          console.log(`[NOTIFICATION EMAIL] ==========================================`);
-          console.log(`[NOTIFICATION EMAIL] Preparing to send to: ${yourEmail}`);
-          console.log(`[NOTIFICATION EMAIL] From email: ${fromEmail}`);
-          console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${name}, Email: ${email}, Date: ${formattedDate}, Time: ${formattedTime}`);
-          console.log(`[NOTIFICATION EMAIL] Resend API Key present: ${!!process.env.RESEND_API_KEY}`);
-          
-          const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${name}\nEmail: ${email}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
+        // Send notification to Zohaib - ALWAYS send to hardcoded email
+        // This ensures you always get notified regardless of environment variables
+        const hardcodedEmail = 'zohaib.s.cheema9@gmail.com';
+        const notificationEmails = [hardcodedEmail];
+        
+        // Also add YOUR_EMAIL if it's different from the hardcoded one
+        if (yourEmail && yourEmail !== hardcodedEmail && !notificationEmails.includes(yourEmail)) {
+          notificationEmails.push(yourEmail);
+        }
 
-          const emailPayload = {
-            from: `Portfolio Bot <${fromEmail}>`,
-            replyTo: email,
-            to: yourEmail,
-            subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
-            text: plainText,
-            headers: {
-              'X-Entity-Ref-ID': `notification-${bookedSlot.id}`,
-            },
+        // Send to all notification emails (starting with hardcoded email)
+        for (const notificationEmail of notificationEmails) {
+          try {
+            console.log(`[NOTIFICATION EMAIL] ==========================================`);
+            console.log(`[NOTIFICATION EMAIL] Preparing to send to: ${notificationEmail}`);
+            console.log(`[NOTIFICATION EMAIL] From email: ${fromEmail}`);
+            console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${name}, Email: ${email}, Date: ${formattedDate}, Time: ${formattedTime}`);
+            console.log(`[NOTIFICATION EMAIL] Resend API Key present: ${!!process.env.RESEND_API_KEY}`);
+            
+            const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${name}\nEmail: ${email}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
+
+            const emailPayload = {
+              from: `Portfolio Bot <${fromEmail}>`,
+              replyTo: email,
+              to: notificationEmail,
+              subject: `New Meeting Booking: ${formattedDate} at ${formattedTime}`,
+              text: plainText,
+              headers: {
+                'X-Entity-Ref-ID': `notification-${bookedSlot.id}`,
+              },
             html: `
               <!DOCTYPE html>
               <html>
@@ -177,38 +187,41 @@ export default async function handler(req, res) {
               </body>
               </html>
             `,
-          };
-          
-          console.log('[NOTIFICATION EMAIL] Email payload prepared');
-          console.log('[NOTIFICATION EMAIL] Sending email...');
-          
-          const yourEmailResult = await resend.emails.send(emailPayload);
-          
-          console.log('[NOTIFICATION EMAIL] ==========================================');
-          console.log('[NOTIFICATION EMAIL] SUCCESS - Email sent to Zohaib');
-          console.log('[NOTIFICATION EMAIL] Response:', JSON.stringify(yourEmailResult, null, 2));
-          console.log(`[NOTIFICATION EMAIL] Email ID: ${yourEmailResult?.id || 'N/A'}`);
-          console.log(`[NOTIFICATION EMAIL] To: ${yourEmail}`);
-          console.log(`[NOTIFICATION EMAIL] From: ${fromEmail}`);
-          console.log('[NOTIFICATION EMAIL] ==========================================');
-        } catch (yourEmailError) {
-          const errorMsg = `Error sending notification email to Zohaib (${yourEmail}): ${yourEmailError.message || yourEmailError}`;
-          console.error('[NOTIFICATION EMAIL] ERROR:', errorMsg);
-          console.error('[NOTIFICATION EMAIL] Full error:', JSON.stringify(yourEmailError, null, 2));
-          emailErrors.push(errorMsg);
-          
-          // Try to send a simple fallback email
-          try {
-            console.log('[NOTIFICATION EMAIL] Attempting fallback email...');
-            await resend.emails.send({
-              from: `Portfolio Bot <${fromEmail}>`,
-              to: yourEmail,
-              subject: `Meeting Booking Alert - ${name}`,
-              text: `Meeting booked: ${name} (${email}) on ${formattedDate} at ${formattedTime}`,
-            });
-            console.log('[NOTIFICATION EMAIL] Fallback email sent successfully');
-          } catch (fallbackError) {
-            console.error('[NOTIFICATION EMAIL] Fallback email also failed:', fallbackError);
+            };
+            
+            console.log(`[NOTIFICATION EMAIL] Email payload prepared for ${notificationEmail}`);
+            console.log(`[NOTIFICATION EMAIL] Sending email...`);
+            
+            const emailResult = await resend.emails.send(emailPayload);
+            
+            console.log(`[NOTIFICATION EMAIL] ==========================================`);
+            console.log(`[NOTIFICATION EMAIL] SUCCESS - Email sent to ${notificationEmail}`);
+            console.log(`[NOTIFICATION EMAIL] Response:`, JSON.stringify(emailResult, null, 2));
+            console.log(`[NOTIFICATION EMAIL] Email ID: ${emailResult?.id || 'N/A'}`);
+            console.log(`[NOTIFICATION EMAIL] To: ${notificationEmail}`);
+            console.log(`[NOTIFICATION EMAIL] From: ${fromEmail}`);
+            console.log(`[NOTIFICATION EMAIL] ==========================================`);
+          } catch (emailError) {
+            const errorMsg = `Error sending notification email to ${notificationEmail}: ${emailError.message || emailError}`;
+            console.error(`[NOTIFICATION EMAIL] ERROR for ${notificationEmail}:`, errorMsg);
+            console.error(`[NOTIFICATION EMAIL] Full error:`, JSON.stringify(emailError, null, 2));
+            emailErrors.push(errorMsg);
+            
+            // If this is the hardcoded email and it failed, try a simple fallback
+            if (notificationEmail === hardcodedEmail) {
+              try {
+                console.log(`[NOTIFICATION EMAIL] Attempting fallback email to ${hardcodedEmail}...`);
+                await resend.emails.send({
+                  from: `Portfolio Bot <${fromEmail}>`,
+                  to: hardcodedEmail,
+                  subject: `Meeting Booking Alert - ${name}`,
+                  text: `Meeting booked: ${name} (${email}) on ${formattedDate} at ${formattedTime}`,
+                });
+                console.log(`[NOTIFICATION EMAIL] Fallback email sent successfully to ${hardcodedEmail}`);
+              } catch (fallbackError) {
+                console.error(`[NOTIFICATION EMAIL] Fallback email also failed for ${hardcodedEmail}:`, fallbackError);
+              }
+            }
           }
         }
       } catch (emailError) {
