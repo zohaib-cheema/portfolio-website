@@ -6,7 +6,14 @@
 import { sql } from '@vercel/postgres';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with validation
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
+if (!resend) {
+  console.warn('[RESEND] WARNING: RESEND_API_KEY not set - emails will not be sent');
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -199,9 +206,19 @@ export default async function handler(req, res) {
         emailData.attachments = [resumeAttachment];
       }
 
-      await resend.emails.send(emailData);
+      console.log('[RESUME APPROVE EMAIL] Sending resume to requester...');
+      const emailResult = await resend.emails.send(emailData);
+      
+      // Validate the response
+      if (!emailResult || !emailResult.id) {
+        throw new Error(`Invalid response from Resend API: ${JSON.stringify(emailResult)}`);
+      }
+      
+      console.log('[RESUME APPROVE EMAIL] SUCCESS - Resume sent to requester');
+      console.log('[RESUME APPROVE EMAIL] Email ID:', emailResult.id);
     } catch (emailError) {
-      console.error('Error sending resume email:', emailError);
+      console.error('[RESUME APPROVE EMAIL] ERROR:', emailError);
+      console.error('[RESUME APPROVE EMAIL] Full error:', JSON.stringify(emailError, null, 2));
       // Don't fail the approval if email fails - status is already updated
     }
 

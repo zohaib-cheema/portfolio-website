@@ -6,7 +6,14 @@
 import { sql } from '@vercel/postgres';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend with validation
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
+if (!resend) {
+  console.warn('[RESEND] WARNING: RESEND_API_KEY not set - emails will not be sent');
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -49,8 +56,8 @@ export default async function handler(req, res) {
     // Send confirmation emails
     let emailErrors = [];
     
-    if (!process.env.RESEND_API_KEY) {
-      console.error('RESEND_API_KEY not set - emails will not be sent');
+    if (!process.env.RESEND_API_KEY || !resend) {
+      console.error('[BOOKING API] RESEND_API_KEY not set - emails will not be sent');
       emailErrors.push('RESEND_API_KEY not configured');
     } else {
       try {
@@ -123,10 +130,17 @@ export default async function handler(req, res) {
               </html>
             `,
           });
-          console.log('Attendee email sent successfully:', attendeeResult);
+          // Validate the response
+          if (!attendeeResult || !attendeeResult.id) {
+            throw new Error(`Invalid response from Resend API: ${JSON.stringify(attendeeResult)}`);
+          }
+          console.log('[ATTENDEE EMAIL] SUCCESS - Email sent to attendee');
+          console.log('[ATTENDEE EMAIL] Response:', JSON.stringify(attendeeResult, null, 2));
+          console.log(`[ATTENDEE EMAIL] Email ID: ${attendeeResult.id}`);
         } catch (attendeeEmailError) {
           const errorMsg = `Error sending confirmation email to attendee (${email}): ${attendeeEmailError.message || attendeeEmailError}`;
-          console.error(errorMsg, attendeeEmailError);
+          console.error('[ATTENDEE EMAIL] ERROR:', errorMsg);
+          console.error('[ATTENDEE EMAIL] Full error:', JSON.stringify(attendeeEmailError, null, 2));
           emailErrors.push(errorMsg);
         }
 
@@ -194,10 +208,15 @@ export default async function handler(req, res) {
             
             const emailResult = await resend.emails.send(emailPayload);
             
+            // Validate the response
+            if (!emailResult || !emailResult.id) {
+              throw new Error(`Invalid response from Resend API: ${JSON.stringify(emailResult)}`);
+            }
+            
             console.log(`[NOTIFICATION EMAIL] ==========================================`);
             console.log(`[NOTIFICATION EMAIL] SUCCESS - Email sent to ${notificationEmail}`);
             console.log(`[NOTIFICATION EMAIL] Response:`, JSON.stringify(emailResult, null, 2));
-            console.log(`[NOTIFICATION EMAIL] Email ID: ${emailResult?.id || 'N/A'}`);
+            console.log(`[NOTIFICATION EMAIL] Email ID: ${emailResult.id}`);
             console.log(`[NOTIFICATION EMAIL] To: ${notificationEmail}`);
             console.log(`[NOTIFICATION EMAIL] From: ${fromEmail}`);
             console.log(`[NOTIFICATION EMAIL] ==========================================`);
@@ -211,13 +230,18 @@ export default async function handler(req, res) {
             if (notificationEmail === hardcodedEmail) {
               try {
                 console.log(`[NOTIFICATION EMAIL] Attempting fallback email to ${hardcodedEmail}...`);
-                await resend.emails.send({
+                const fallbackResult = await resend.emails.send({
                   from: `Portfolio Bot <${fromEmail}>`,
                   to: hardcodedEmail,
                   subject: `Meeting Booking Alert - ${name}`,
                   text: `Meeting booked: ${name} (${email}) on ${formattedDate} at ${formattedTime}`,
                 });
-                console.log(`[NOTIFICATION EMAIL] Fallback email sent successfully to ${hardcodedEmail}`);
+                if (fallbackResult && fallbackResult.id) {
+                  console.log(`[NOTIFICATION EMAIL] Fallback email sent successfully to ${hardcodedEmail}`);
+                  console.log(`[NOTIFICATION EMAIL] Fallback Email ID: ${fallbackResult.id}`);
+                } else {
+                  console.error(`[NOTIFICATION EMAIL] Fallback email sent but no ID returned`);
+                }
               } catch (fallbackError) {
                 console.error(`[NOTIFICATION EMAIL] Fallback email also failed for ${hardcodedEmail}:`, fallbackError);
               }
