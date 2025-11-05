@@ -84,16 +84,15 @@ export default async function handler(req, res) {
       }
     }
 
-    // Send approval email to Zohaib - ALWAYS send to hardcoded email
-    // This ensures you always get notified regardless of environment variables
-    const hardcodedEmail = 'zohaib.s.cheema9@gmail.com';
-    const yourEmail = process.env.YOUR_EMAIL || hardcodedEmail;
-    const notificationEmails = [hardcodedEmail];
+    // Send approval email to Zohaib
+    // CRITICAL: Resend free tier ONLY allows sending to account owner's email
+    // Account owner email: zscheema9@gmail.com
+    // Sending to other emails will fail with 403 validation_error
+    const resendAccountEmail = 'zscheema9@gmail.com'; // Resend account owner email (REQUIRED)
+    const notificationEmails = [resendAccountEmail];
     
-    // Also add YOUR_EMAIL if it's different from the hardcoded one
-    if (yourEmail && yourEmail !== hardcodedEmail && !notificationEmails.includes(yourEmail)) {
-      notificationEmails.push(yourEmail);
-    }
+    // Note: We can't send to zohaib.s.cheema9@gmail.com without domain verification
+    // The account owner email (zscheema9@gmail.com) will receive all notifications
     
     // Get base URL from environment or use default
     let baseUrl = 'https://www.zohaibcheema.com';
@@ -210,26 +209,26 @@ export default async function handler(req, res) {
         console.error(`[RESUME REQUEST EMAIL] ERROR for ${notificationEmail}:`, errorMsg);
         console.error(`[RESUME REQUEST EMAIL] Full error:`, JSON.stringify(emailError, null, 2));
         
-        // If this is the hardcoded email and it failed, try a simple fallback
-        if (notificationEmail === hardcodedEmail) {
+        // If sending failed, try a simple fallback email
+        if (notificationEmail === resendAccountEmail) {
           try {
-            console.log(`[RESUME REQUEST EMAIL] Attempting fallback email to ${hardcodedEmail}...`);
+            console.log(`[RESUME REQUEST EMAIL] Attempting fallback email to ${resendAccountEmail}...`);
             const fallbackResult = await resend.emails.send({
               from: `Portfolio Bot <${fromEmail}>`,
-              to: hardcodedEmail,
+              to: resendAccountEmail,
               subject: `Resume Request Alert - ${email}`,
               text: `Resume requested by: ${email} at ${requestTime}`,
             });
             const fallbackId = fallbackResult?.id || fallbackResult?.data?.id || fallbackResult?.data?.data?.id;
             if (fallbackId) {
-              console.log(`[RESUME REQUEST EMAIL] Fallback email sent successfully to ${hardcodedEmail}`);
+              console.log(`[RESUME REQUEST EMAIL] Fallback email sent successfully to ${resendAccountEmail}`);
               console.log(`[RESUME REQUEST EMAIL] Fallback Email ID: ${fallbackId}`);
             } else {
               console.warn(`[RESUME REQUEST EMAIL] Fallback email sent but no ID returned`);
               console.warn(`[RESUME REQUEST EMAIL] Fallback response:`, JSON.stringify(fallbackResult, null, 2));
             }
           } catch (fallbackError) {
-            console.error(`[RESUME REQUEST EMAIL] Fallback email also failed for ${hardcodedEmail}:`, fallbackError);
+            console.error(`[RESUME REQUEST EMAIL] Fallback email also failed for ${resendAccountEmail}:`, fallbackError);
           }
         }
       }

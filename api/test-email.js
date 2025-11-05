@@ -15,7 +15,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const testEmail = 'zohaib.s.cheema9@gmail.com';
+  // Resend free tier only allows sending to account owner's email
+  // Based on the error, the account owner email is: zscheema9@gmail.com
+  const testEmail = 'zscheema9@gmail.com';
   const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
   if (!resend) {
