@@ -130,13 +130,25 @@ export default async function handler(req, res) {
               </html>
             `,
           });
-          // Validate the response
-          if (!attendeeResult || !attendeeResult.id) {
-            throw new Error(`Invalid response from Resend API: ${JSON.stringify(attendeeResult)}`);
+          // Check multiple possible response structures
+          const attendeeEmailId = attendeeResult?.id || attendeeResult?.data?.id || attendeeResult?.data?.data?.id;
+          
+          if (!attendeeResult) {
+            throw new Error(`Empty response from Resend API`);
           }
+          
+          if (!attendeeEmailId) {
+            console.warn('[ATTENDEE EMAIL] WARNING - No email ID in response structure');
+            console.warn('[ATTENDEE EMAIL] Full response:', JSON.stringify(attendeeResult, null, 2));
+          }
+          
           console.log('[ATTENDEE EMAIL] SUCCESS - Email sent to attendee');
           console.log('[ATTENDEE EMAIL] Response:', JSON.stringify(attendeeResult, null, 2));
-          console.log(`[ATTENDEE EMAIL] Email ID: ${attendeeResult.id}`);
+          if (attendeeEmailId) {
+            console.log(`[ATTENDEE EMAIL] Email ID: ${attendeeEmailId}`);
+          } else {
+            console.log(`[ATTENDEE EMAIL] Email ID: Not returned in response`);
+          }
         } catch (attendeeEmailError) {
           const errorMsg = `Error sending confirmation email to attendee (${email}): ${attendeeEmailError.message || attendeeEmailError}`;
           console.error('[ATTENDEE EMAIL] ERROR:', errorMsg);
