@@ -89,7 +89,7 @@ const Projects = () => {
         className="mt-16 flex justify-center"
       >
         <a
-          href="https://github.com/zohaib-cheema?tab=repositories"
+          href="https://github.com/zohaib-cheema"
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-full bg-gradient-to-r from-pink-400 via-slate-500 to-purple-500 px-6 py-3 text-white text-sm font-semibold shadow-lg hover:scale-105 transition-transform duration-200"
