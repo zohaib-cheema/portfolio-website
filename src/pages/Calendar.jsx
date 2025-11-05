@@ -17,6 +17,7 @@ const Calendar = () => {
   });
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingDetails, setBookingDetails] = useState(null);
   const [userTimezone, setUserTimezone] = useState('');
   const [expandedDates, setExpandedDates] = useState(new Set());
 
@@ -156,12 +157,20 @@ const Calendar = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Store booking details for display and Google Calendar
+        setBookingDetails({
+          ...bookingForm,
+          date: data.booking.date,
+          time: data.booking.time,
+          datetime: data.booking.datetime,
+          meetingType: data.booking.meetingType,
+        });
         setBookingSuccess(true);
         setTimeout(() => {
           fetchSlots(true);
           setSelectedSlot(null);
           setBookingForm({ name: '', email: '', meetingType: 'Mentorship', notes: '' });
-        }, 2000);
+        }, 8000); // Increased timeout to give user time to see spam reminder and add to calendar
       } else {
         alert(data.error || 'This slot has already been booked. Please select another time.');
         fetchSlots(true);
@@ -222,24 +231,76 @@ const Calendar = () => {
           )}
         </motion.div>
 
-        {bookingSuccess ? (
+        {bookingSuccess && bookingDetails ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="max-w-2xl mx-auto bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-8 rounded-3xl shadow-lg text-center"
+            className="max-w-2xl mx-auto bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-8 rounded-3xl shadow-lg"
           >
-            <FaCalendarCheck className="text-green-400 text-5xl mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">Booking Confirmed!</h2>
-            <p className="text-neutral-300 mb-4">
-              Your meeting has been scheduled. You'll receive a confirmation email shortly.
-            </p>
+            <div className="text-center mb-6">
+              <FaCalendarCheck className="text-green-400 text-5xl mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-white mb-2">Booking Confirmed!</h2>
+              <div className="bg-neutral-800/50 p-4 rounded-lg mb-4 text-left">
+                <p className="text-neutral-400 text-sm mb-1">Meeting Details</p>
+                <p className="text-white font-semibold">
+                  {format(toZonedTime(parseISO(bookingDetails.datetime), userTimezone || 'UTC'), 'EEEE, MMMM d, yyyy')} at {format(toZonedTime(parseISO(bookingDetails.datetime), userTimezone || 'UTC'), 'h:mm a')}
+                </p>
+                <p className="text-neutral-400 text-sm mt-1">{bookingDetails.meetingType}</p>
+              </div>
+            </div>
+
+            {/* Spam Folder Warning */}
+            <div className="bg-yellow-500/20 border-2 border-yellow-500/50 rounded-lg p-4 mb-6">
+              <p className="text-yellow-200 font-semibold text-lg mb-2">⚠️ Check Your Spam Folder!</p>
+              <p className="text-yellow-100 text-sm">
+                A confirmation email has been sent to <strong>{bookingDetails.email}</strong>. 
+                If you don't see it in your inbox, please check your <strong>spam/junk folder</strong>. 
+                The email contains important meeting details and the Zoom link.
+              </p>
+            </div>
+
+            {/* Google Calendar Button */}
+            {(() => {
+              // Convert datetime to Google Calendar format (YYYYMMDDTHHmmssZ in UTC)
+              const startDate = parseISO(bookingDetails.datetime);
+              const endDate = new Date(startDate.getTime() + 30 * 60 * 1000); // 30 minutes later
+              
+              const formatGoogleDate = (date) => {
+                return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+              };
+              
+              const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+              googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
+              googleCalendarUrl.searchParams.set('text', `Meeting with Zohaib - ${bookingDetails.meetingType}`);
+              googleCalendarUrl.searchParams.set('dates', `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
+              googleCalendarUrl.searchParams.set('details', `Meeting Type: ${bookingDetails.meetingType}${bookingDetails.notes ? `\n\nNotes: ${bookingDetails.notes}` : ''}\n\nContact: zohaib.s.cheema9@gmail.com`);
+              googleCalendarUrl.searchParams.set('location', 'Zoom - Link will be sent via email');
+              
+              return (
+                <div className="mb-6">
+                  <a
+                    href={googleCalendarUrl.toString()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+                    </svg>
+                    Add to Google Calendar
+                  </a>
+                </div>
+              );
+            })()}
+
             <button
               onClick={() => {
                 setBookingSuccess(false);
+                setBookingDetails(null);
                 setSelectedSlot(null);
                 fetchSlots(true);
               }}
-              className="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity"
+              className="w-full px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
             >
               Book Another Meeting
             </button>

@@ -131,13 +131,17 @@ export default async function handler(req, res) {
         }
 
         // Send notification to Zohaib - send this separately and ensure it's sent
+        // This is critical - we need to ensure this email is sent
         try {
+          console.log(`[NOTIFICATION EMAIL] ==========================================`);
           console.log(`[NOTIFICATION EMAIL] Preparing to send to: ${yourEmail}`);
+          console.log(`[NOTIFICATION EMAIL] From email: ${fromEmail}`);
           console.log(`[NOTIFICATION EMAIL] Booking details - Name: ${name}, Email: ${email}, Date: ${formattedDate}, Time: ${formattedTime}`);
+          console.log(`[NOTIFICATION EMAIL] Resend API Key present: ${!!process.env.RESEND_API_KEY}`);
           
           const plainText = `Hi Zohaib,\n\nSomeone has booked a meeting with you:\n\nName: ${name}\nEmail: ${email}\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}`;
 
-          const yourEmailResult = await resend.emails.send({
+          const emailPayload = {
             from: `Portfolio Bot <${fromEmail}>`,
             replyTo: email,
             to: yourEmail,
@@ -173,11 +177,20 @@ export default async function handler(req, res) {
               </body>
               </html>
             `,
-          });
-          console.log('[NOTIFICATION EMAIL] Successfully sent to Zohaib');
+          };
+          
+          console.log('[NOTIFICATION EMAIL] Email payload prepared');
+          console.log('[NOTIFICATION EMAIL] Sending email...');
+          
+          const yourEmailResult = await resend.emails.send(emailPayload);
+          
+          console.log('[NOTIFICATION EMAIL] ==========================================');
+          console.log('[NOTIFICATION EMAIL] SUCCESS - Email sent to Zohaib');
           console.log('[NOTIFICATION EMAIL] Response:', JSON.stringify(yourEmailResult, null, 2));
           console.log(`[NOTIFICATION EMAIL] Email ID: ${yourEmailResult?.id || 'N/A'}`);
           console.log(`[NOTIFICATION EMAIL] To: ${yourEmail}`);
+          console.log(`[NOTIFICATION EMAIL] From: ${fromEmail}`);
+          console.log('[NOTIFICATION EMAIL] ==========================================');
         } catch (yourEmailError) {
           const errorMsg = `Error sending notification email to Zohaib (${yourEmail}): ${yourEmailError.message || yourEmailError}`;
           console.error('[NOTIFICATION EMAIL] ERROR:', errorMsg);
@@ -205,7 +218,8 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({
+    // Include email errors in response for debugging (but don't fail the booking)
+    const responseData = {
       success: true,
       message: 'Booking confirmed',
       booking: {
@@ -215,7 +229,17 @@ export default async function handler(req, res) {
         datetime: bookedSlot.datetime,
         meetingType: bookedSlot.meetingType
       }
-    });
+    };
+
+    // Log email status
+    if (emailErrors.length > 0) {
+      console.error('[BOOKING API] Email errors occurred:', emailErrors);
+      responseData.emailWarnings = emailErrors;
+    } else {
+      console.log('[BOOKING API] All emails sent successfully');
+    }
+
+    return res.status(200).json(responseData);
   } catch (error) {
     console.error('Error booking slot:', error);
     res.status(500).json({ error: 'Failed to book slot' });
