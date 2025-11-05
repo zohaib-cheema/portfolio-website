@@ -164,6 +164,7 @@ const Calendar = () => {
           time: data.booking.time,
           datetime: data.booking.datetime,
           meetingType: data.booking.meetingType,
+          zoomLink: data.booking.zoomLink || '', // Include zoom link from booking response
         });
         setBookingSuccess(true);
         setTimeout(() => {
@@ -268,12 +269,22 @@ const Calendar = () => {
                 return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
               };
               
+              // Build Google Calendar description with Zoom link
+              let calendarDescription = `Meeting Type: ${bookingDetails.meetingType}`;
+              if (bookingDetails.notes) {
+                calendarDescription += `\n\nNotes: ${bookingDetails.notes}`;
+              }
+              if (bookingDetails.zoomLink) {
+                calendarDescription += `\n\nZoom Link: ${bookingDetails.zoomLink}`;
+              }
+              calendarDescription += `\n\nContact: zohaib.s.cheema9@gmail.com`;
+              
               const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
               googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
               googleCalendarUrl.searchParams.set('text', `Meeting with Zohaib - ${bookingDetails.meetingType}`);
               googleCalendarUrl.searchParams.set('dates', `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
-              googleCalendarUrl.searchParams.set('details', `Meeting Type: ${bookingDetails.meetingType}${bookingDetails.notes ? `\n\nNotes: ${bookingDetails.notes}` : ''}\n\nContact: zohaib.s.cheema9@gmail.com`);
-              googleCalendarUrl.searchParams.set('location', 'Zoom - Link will be sent via email');
+              googleCalendarUrl.searchParams.set('details', calendarDescription);
+              googleCalendarUrl.searchParams.set('location', bookingDetails.zoomLink || 'Zoom - Link will be sent via email');
               
               return (
                 <div className="mb-6">
