@@ -164,6 +164,7 @@ const Calendar = () => {
           time: data.booking.time,
           datetime: data.booking.datetime,
           meetingType: data.booking.meetingType,
+          zoomLink: data.booking.zoomLink || '', // Include zoom link from API response
         });
         setBookingSuccess(true);
         setTimeout(() => {
@@ -249,13 +250,14 @@ const Calendar = () => {
               </div>
             </div>
 
-            {/* Spam Folder Warning */}
+            {/* Important: Add to Calendar Notice */}
             <div className="bg-yellow-500/20 border-2 border-yellow-500/50 rounded-lg p-4 mb-6">
-              <p className="text-yellow-200 font-semibold text-lg mb-2">⚠️ Check Your Spam Folder!</p>
+              <p className="text-yellow-200 font-semibold text-lg mb-2">⚠️ Important: Add to Your Calendar</p>
+              <p className="text-yellow-100 text-sm mb-2">
+                A confirmation email cannot be sent automatically. <strong>You must add this meeting to your Google Calendar</strong> using the button below to save all meeting details.
+              </p>
               <p className="text-yellow-100 text-sm">
-                A confirmation email has been sent to <strong>{bookingDetails.email}</strong>. 
-                If you don't see it in your inbox, please check your <strong>spam/junk folder</strong>. 
-                The email contains important meeting details and the Zoom link.
+                The calendar event includes the meeting date, time, Zoom link, and all other details.
               </p>
             </div>
 
@@ -273,8 +275,19 @@ const Calendar = () => {
               googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
               googleCalendarUrl.searchParams.set('text', `Meeting with Zohaib - ${bookingDetails.meetingType}`);
               googleCalendarUrl.searchParams.set('dates', `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
-              googleCalendarUrl.searchParams.set('details', `Meeting Type: ${bookingDetails.meetingType}${bookingDetails.notes ? `\n\nNotes: ${bookingDetails.notes}` : ''}\n\nContact: zohaib.s.cheema9@gmail.com`);
-              googleCalendarUrl.searchParams.set('location', 'Zoom - Link will be sent via email');
+              
+              // Build details with Zoom link if available
+              let details = `Meeting Type: ${bookingDetails.meetingType}`;
+              if (bookingDetails.notes) {
+                details += `\n\nNotes: ${bookingDetails.notes}`;
+              }
+              if (bookingDetails.zoomLink) {
+                details += `\n\nZoom Link: ${bookingDetails.zoomLink}`;
+              }
+              details += `\n\nContact: zohaib.s.cheema9@gmail.com`;
+              
+              googleCalendarUrl.searchParams.set('details', details);
+              googleCalendarUrl.searchParams.set('location', bookingDetails.zoomLink || 'Zoom - Link in description');
               
               return (
                 <div className="mb-6">

@@ -84,77 +84,11 @@ export default async function handler(req, res) {
         // For testing, use: onboarding@resend.dev (works without domain verification)
         const fromEmail = process.env.EMAIL_FROM || 'onboarding@resend.dev';
 
-        // Send confirmation to the attendee
-        try {
-          const plainText = `Hi ${name},\n\nYour meeting with Zohaib has been confirmed:\n\nDate: ${formattedDate}\nTime: ${formattedTime}\nType: ${meetingType}${notes ? `\nNotes: ${notes}` : ''}${zoomLink ? `\n\nZoom Link: ${zoomLink}` : ''}\n\nI look forward to speaking with you!\n\nBest regards,\nZohaib Cheema\nEmail: ${yourEmail}\nLinkedIn: ${linkedinUrl}`;
-
-          const attendeeResult = await resend.emails.send({
-            from: `Zohaib Cheema <${fromEmail}>`,
-            replyTo: yourEmail,
-            to: email,
-            subject: `Meeting Confirmed - ${formattedDate} at ${formattedTime}`,
-            text: plainText,
-            headers: {
-              'X-Entity-Ref-ID': `meeting-${bookedSlot.id}`,
-            },
-            html: `
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              </head>
-              <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #333; border-bottom: 2px solid #0066ff; padding-bottom: 10px;">Meeting Confirmed!</h2>
-                <p>Hi ${name},</p>
-                <p>Your meeting with Zohaib has been confirmed:</p>
-                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0066ff;">
-                  <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
-                  <p style="margin: 8px 0;"><strong>Time:</strong> ${formattedTime}</p>
-                  <p style="margin: 8px 0;"><strong>Type:</strong> ${meetingType}</p>
-                  ${notes ? `<p style="margin: 8px 0;"><strong>Notes:</strong> ${notes}</p>` : ''}
-                  ${zoomLink ? `
-                    <p style="margin-top: 15px; margin-bottom: 8px;"><strong>Zoom Link:</strong></p>
-                    <p style="margin: 8px 0;"><a href="${zoomLink}" style="color: #0066ff; text-decoration: none; word-break: break-all; font-weight: bold;">${zoomLink}</a></p>
-                  ` : ''}
-                </div>
-                <p>I look forward to speaking with you!</p>
-                <p>Best regards,<br><strong>Zohaib Cheema</strong></p>
-                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                  <p style="margin: 5px 0; color: #333; font-size: 14px;"><strong>Zohaib Cheema</strong></p>
-                  <p style="margin: 5px 0; color: #666; font-size: 13px;"><a href="mailto:${yourEmail}" style="color: #0066ff; text-decoration: none;">${yourEmail}</a></p>
-                  <p style="margin: 5px 0; color: #666; font-size: 13px;"><a href="${linkedinUrl}" style="color: #0066ff; text-decoration: none;">LinkedIn Profile</a></p>
-                </div>
-                <p style="color: #666; font-size: 12px; margin-top: 20px;">If you have any questions, please reply to this email.</p>
-              </body>
-              </html>
-            `,
-          });
-          // Check multiple possible response structures
-          const attendeeEmailId = attendeeResult?.id || attendeeResult?.data?.id || attendeeResult?.data?.data?.id;
-          
-          if (!attendeeResult) {
-            throw new Error(`Empty response from Resend API`);
-          }
-          
-          if (!attendeeEmailId) {
-            console.warn('[ATTENDEE EMAIL] WARNING - No email ID in response structure');
-            console.warn('[ATTENDEE EMAIL] Full response:', JSON.stringify(attendeeResult, null, 2));
-          }
-          
-          console.log('[ATTENDEE EMAIL] SUCCESS - Email sent to attendee');
-          console.log('[ATTENDEE EMAIL] Response:', JSON.stringify(attendeeResult, null, 2));
-          if (attendeeEmailId) {
-            console.log(`[ATTENDEE EMAIL] Email ID: ${attendeeEmailId}`);
-          } else {
-            console.log(`[ATTENDEE EMAIL] Email ID: Not returned in response`);
-          }
-        } catch (attendeeEmailError) {
-          const errorMsg = `Error sending confirmation email to attendee (${email}): ${attendeeEmailError.message || attendeeEmailError}`;
-          console.error('[ATTENDEE EMAIL] ERROR:', errorMsg);
-          console.error('[ATTENDEE EMAIL] Full error:', JSON.stringify(attendeeEmailError, null, 2));
-          emailErrors.push(errorMsg);
-        }
+        // NOTE: Resend free tier only allows sending to account owner's email
+        // We cannot send confirmation emails to attendees without domain verification
+        // Users should add the meeting to their Google Calendar which includes all details
+        console.log('[ATTENDEE EMAIL] Skipping attendee email - Resend free tier restriction');
+        console.log('[ATTENDEE EMAIL] Attendee should add meeting to Google Calendar for confirmation');
 
         // Send notification to Zohaib
         // CRITICAL: Resend free tier ONLY allows sending to account owner's email
@@ -295,7 +229,8 @@ export default async function handler(req, res) {
         date: bookedSlot.date,
         time: bookedSlot.time,
         datetime: bookedSlot.datetime,
-        meetingType: bookedSlot.meetingType
+        meetingType: bookedSlot.meetingType,
+        zoomLink: zoomLink || '' // Include zoom link in response for Google Calendar
       }
     };
 
