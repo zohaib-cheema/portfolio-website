@@ -132,7 +132,11 @@ const TechStack = () => {
               </h3>
 
               {/* Tech Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              <div className={`grid gap-4 ${
+                category.title === "Languages" 
+                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 justify-items-center max-w-2xl mx-auto"
+                  : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+              }`}>
                 {visibleTechs.map((tech, techIndex) => (
                   <motion.div
                     key={tech}
