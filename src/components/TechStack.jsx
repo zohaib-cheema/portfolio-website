@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 // Technology name mapping for display
 const techNameMap = {
@@ -81,6 +82,16 @@ const fadeIn = (delay = 0) => ({
 });
 
 const TechStack = () => {
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const MAX_VISIBLE_TECHS = 5;
+
+  const toggleCategory = (categoryTitle) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [categoryTitle]: !prev[categoryTitle],
+    }));
+  };
+
   return (
     <section
       id="tech-stack"
@@ -98,52 +109,72 @@ const TechStack = () => {
       </motion.h2>
 
       {/* Categories */}
-      <div className="space-y-12 mt-16">
-        {techCategories.map((category, categoryIndex) => (
-          <motion.div
-            key={category.title}
-            variants={fadeIn(categoryIndex * 0.1)}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="w-full"
-          >
-            {/* Category Title */}
-            <h3 className="text-xl sm:text-2xl font-semibold text-purple-300 mb-6 text-center">
-              {category.title}
-            </h3>
+      <div className="space-y-6 mt-16 max-w-6xl mx-auto">
+        {techCategories.map((category, categoryIndex) => {
+          const isExpanded = expandedCategories[category.title];
+          const visibleTechs = isExpanded
+            ? category.technologies
+            : category.technologies.slice(0, MAX_VISIBLE_TECHS);
+          const hasMore = category.technologies.length > MAX_VISIBLE_TECHS;
 
-            {/* Tech Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {category.technologies.map((tech, techIndex) => (
-                <motion.div
-                  key={tech}
-                  variants={fadeIn(categoryIndex * 0.1 + techIndex * 0.05)}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  className="flex flex-col items-center justify-center rounded-xl bg-neutral-900/40 p-4 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
-                >
-                  {/* Icon */}
-                  <img
-                    src={`https://skillicons.dev/icons?i=${tech}&theme=dark`}
-                    alt={techNameMap[tech] || tech}
-                    className="w-12 h-12 sm:w-14 sm:h-14 mb-2 object-contain"
-                    loading="lazy"
-                    onError={(e) => {
-                      // Fallback if icon fails to load
-                      e.target.style.display = 'none';
-                    }}
-                  />
-                  {/* Name */}
-                  <span className="text-xs sm:text-sm text-neutral-300 text-center font-medium">
-                    {techNameMap[tech] || tech}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        ))}
+          return (
+            <motion.div
+              key={category.title}
+              variants={fadeIn(categoryIndex * 0.1)}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="w-full rounded-xl bg-neutral-900/40 p-6 sm:p-8 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
+            >
+              {/* Category Title */}
+              <h3 className="text-xl sm:text-2xl font-semibold text-purple-300 mb-6 text-center">
+                {category.title}
+              </h3>
+
+              {/* Tech Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {visibleTechs.map((tech, techIndex) => (
+                  <motion.div
+                    key={tech}
+                    variants={fadeIn(categoryIndex * 0.1 + techIndex * 0.05)}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="flex flex-col items-center justify-center rounded-lg bg-neutral-800/40 p-3 sm:p-4 hover:bg-neutral-800/60 transition-colors duration-200"
+                  >
+                    {/* Icon */}
+                    <img
+                      src={`https://skillicons.dev/icons?i=${tech}&theme=dark`}
+                      alt={techNameMap[tech] || tech}
+                      className="w-10 h-10 sm:w-12 sm:h-12 mb-2 object-contain"
+                      loading="lazy"
+                      onError={(e) => {
+                        // Fallback if icon fails to load
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    {/* Name */}
+                    <span className="text-xs sm:text-sm text-neutral-300 text-center font-medium">
+                      {techNameMap[tech] || tech}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* See More/Less Button */}
+              {hasMore && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={() => toggleCategory(category.title)}
+                    className="px-6 py-2 rounded-full bg-gradient-to-r from-pink-400 via-slate-500 to-purple-500 text-white text-sm font-medium shadow-lg hover:scale-105 transition-transform duration-200"
+                  >
+                    {isExpanded ? "See Less" : "See More"}
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );
