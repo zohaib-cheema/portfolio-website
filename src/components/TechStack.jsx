@@ -134,7 +134,7 @@ const TechStack = () => {
               {/* Tech Grid */}
               <div className={`grid gap-4 ${
                 category.title === "Languages" 
-                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 justify-items-center max-w-2xl mx-auto"
+                  ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 max-w-2xl mx-auto"
                   : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
               }`}>
                 {visibleTechs.map((tech, techIndex) => (
@@ -144,7 +144,7 @@ const TechStack = () => {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    className="flex flex-col items-center justify-center rounded-lg bg-neutral-800/40 p-3 sm:p-4 hover:bg-neutral-800/60 transition-colors duration-200"
+                    className="flex flex-col items-center justify-center rounded-lg bg-neutral-800/40 p-3 sm:p-4 hover:bg-neutral-800/60 transition-colors duration-200 w-full"
                   >
                     {/* Icon */}
                     <img
