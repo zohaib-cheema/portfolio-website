@@ -51,6 +51,10 @@ const techNameMap = {
 // Technology categories
 const techCategories = [
   {
+    title: "Languages",
+    technologies: ["python", "go", "java", "c"],
+  },
+  {
     title: "Frontend",
     technologies: ["js", "ts", "vue", "angular", "react", "nextjs", "flutter", "html", "css", "sass", "tailwind"],
   },
@@ -65,10 +69,6 @@ const techCategories = [
   {
     title: "Testing / Dev",
     technologies: ["cypress", "githubactions", "bash", "linux", "gradle", "vim", "emacs"],
-  },
-  {
-    title: "Languages",
-    technologies: ["python", "go", "java", "c"],
   },
 ];
 

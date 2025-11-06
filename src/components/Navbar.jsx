@@ -11,6 +11,7 @@ const Navbar = () => {
     { title: "About Me", id: "traits" },
     { title: "Work", id: "experience" },
     { title: "Leadership", id: "leadership" },
+    { title: "Tech", id: "tech-stack" },
     { title: "Projects", id: "projects" },
     { title: "Contact", id: "contact" },
   ];
