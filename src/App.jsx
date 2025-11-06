@@ -5,6 +5,7 @@ import Hero from "./components/Hero";
 import Navbar from "./components/Navbar";
 import Projects from "./components/Projects";
 import Technologies from "./components/Technologies";
+import TechStack from "./components/TechStack";
 import Leadership from "./components/Leadership";
 import TraitsConvergence from "./components/TraitsConvergence";
 import Chatbot from "./components/Chatbot";
@@ -19,6 +20,7 @@ const HomePage = () => {
       <TraitsConvergence />
       <Experience />
       <Leadership />
+      <TechStack />
       <Projects />
       <Contact />
     </>
