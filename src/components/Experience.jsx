@@ -50,9 +50,10 @@ const Experience = () => {
                   {experience.year}
                 </p>
                 <h3 className="text-lg sm:text-xl font-semibold text-white">
-                  {experience.role}{" "}
-                  <span className="text-purple-300 font-normal">
-                    — {experience.company}
+                  {experience.role}
+                  <br className="hidden sm:block" />
+                  <span className="text-purple-300 font-normal text-base sm:text-lg">
+                    {experience.company}
                   </span>
                 </h3>
               </div>
