@@ -42,7 +42,7 @@ const SkillLabsPreview = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="rounded-2xl bg-neutral-900/40 border border-neutral-800/60 p-5 flex flex-col gap-4"
+            className="rounded-2xl bg-neutral-900/40 border border-neutral-800/60 p-5 flex flex-col gap-4 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
           >
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-purple-300">

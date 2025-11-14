@@ -359,7 +359,7 @@ const TraitsConvergence = () => {
         style={{ opacity: mergedOpacity }}
         className="mt-8 sm:mt-16 w-full max-w-4xl mx-auto px-4"
       >
-        <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-4 sm:p-6 rounded-3xl shadow-lg">
+        <div className="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 p-4 sm:p-6 rounded-3xl shadow-lg border border-neutral-800/60 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300">
           <div className="text-neutral-200 text-sm sm:text-base md:text-lg space-y-3 sm:space-y-4">
             <p>
               Hey there! I'm Zohaib (Zo-hey-b), a Computer Science and Math student who loves building things that actually help people.

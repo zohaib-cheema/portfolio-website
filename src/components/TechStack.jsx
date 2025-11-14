@@ -102,7 +102,7 @@ const TechStack = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="rounded-2xl border border-neutral-800/60 bg-neutral-900/40 p-6"
+            className="rounded-2xl border border-neutral-800/60 bg-neutral-900/40 p-6 shadow-[0_0_15px_3px_rgba(192,132,252,0.0)] hover:shadow-[0_0_15px_3px_rgba(192,132,252,0.6)] transition-shadow duration-300"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
               <h3 className="text-2xl font-semibold text-purple-300">
