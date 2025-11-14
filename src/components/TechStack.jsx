@@ -48,20 +48,24 @@ const techNameMap = {
 
 const techCategories = [
   {
-    title: "Product Foundations",
-    technologies: ["react", "nextjs", "ts", "js", "sass", "tailwind", "figma"],
+    title: "Languages",
+    technologies: ["python", "go", "java", "c"],
   },
   {
-    title: "Systems & Backend",
-    technologies: ["nodejs", "express", "python", "go", "kafka", "aws", "gcp", "docker"],
+    title: "Frontend",
+    technologies: ["js", "ts", "vue", "angular", "react", "nextjs", "flutter", "html", "css", "sass", "tailwind"],
   },
   {
-    title: "Data & AI",
-    technologies: ["postgres", "mysql", "mongodb", "firebase", "tensorflow", "kafka"],
+    title: "Backend & Tools",
+    technologies: ["nodejs", "express", "mongodb", "firebase", "flask", "kafka", "jest", "postman", "git", "figma", "idea", "vscode"],
   },
   {
-    title: "Developer Experience",
-    technologies: ["jest", "cypress", "githubactions", "bash", "linux", "gradle", "vscode"],
+    title: "Databases / Auth / Hosting",
+    technologies: ["postgres", "mysql", "aws", "gcp", "azure", "docker", "supabase", "vercel", "netlify"],
+  },
+  {
+    title: "Testing / Dev",
+    technologies: ["cypress", "githubactions", "bash", "linux", "gradle", "vim", "emacs"],
   },
 ];
 
