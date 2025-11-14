@@ -70,9 +70,10 @@ const SkillLabsPreview = () => {
       <div className="mt-10 flex justify-center">
         <Link
           to="/labs"
+          onClick={() => window.scrollTo({ top: 0, behavior: "instant" })}
           className="rounded-full bg-gradient-to-r from-pink-400 via-slate-500 to-purple-500 px-6 py-3 text-white text-sm font-semibold shadow-lg hover:scale-105 transition-transform duration-200"
         >
-          View full Labs hub →
+          View Full Labs Hub →
         </Link>
       </div>
     </section>

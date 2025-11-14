@@ -13,7 +13,6 @@ const Navbar = () => {
     { title: "Work", id: "experience" },
     { title: "Leadership", id: "leadership" },
     { title: "Skill Labs", id: "skill-labs" },
-    { title: "Artifacts", id: "artifact-library" },
     { title: "Tech", id: "tech-stack" },
     { title: "Projects", id: "projects" },
     { title: "Contact", id: "contact" },
@@ -67,6 +66,12 @@ const Navbar = () => {
     setMenuOpen(false);
   };
 
+  const handleLogoClick = () => {
+    setActive("");
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 px-6 py-4 ${
@@ -77,7 +82,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2" onClick={handleLogoClick}>
           <img src={logo} alt="logo" className="w-10 h-10 object-contain" />
         </Link>
 
