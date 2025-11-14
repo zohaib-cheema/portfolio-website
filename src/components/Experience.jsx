@@ -61,7 +61,7 @@ const Experience = () => {
                   onClick={() => toggleDropdown(index)}
                   className="w-full sm:w-auto px-4 py-2 rounded-full bg-gradient-to-r from-pink-400 via-slate-500 to-purple-500 text-white text-sm sm:text-base font-medium shadow-lg hover:scale-105 transition-transform duration-200"
                 >
-                  {expandedIndex === index ? "Hide Details" : "View Details"}
+                  {expandedIndex === index ? "Hide Summary" : "View Summary"}
                 </button>
               </div>
             </div>
@@ -82,6 +82,9 @@ const Experience = () => {
                     </span>
                   ))}
                 </div>
+                <p className="text-xs italic text-neutral-500 text-right mt-3">
+                  *Request Resume for detailed description and metrics*
+                </p>
               </div>
             )}
           </motion.div>
