@@ -65,3 +65,155 @@ export const CONTACT = {
   phoneNo: "+1 619-897-5041 ",
   email: "zohaib.s.cheema9@gmail.com",
 };
+
+export const SKILL_PLAYGROUNDS = [
+  {
+    id: "ai-sandbox",
+    title: "Generative AI Sandbox",
+    demandSignals: ["GenAI automation", "Prompt engineering", "EvalOps"],
+    summary:
+      "Multi-agent workflows that turn ambiguous product specs into validated features with automated guardrails.",
+    highlights: [
+      "AutoGen agents co-write TypeScript test harnesses from PRDs and self-critique with vectorized guardrails.",
+      "Latency & cost overlays keep inferencing under 120ms while surfacing prompt efficiency deltas.",
+      "Red-team notebook documents jailbreak attempts, mitigations, and lessons learned.",
+    ],
+    artifacts: ["Prompt graph", "Auto-eval log", "Risk register snapshot"],
+    ctaLabel: "Launch AI Sandbox",
+    ctaLink: "#ai-sandbox-lab",
+  },
+  {
+    id: "cloud-ops",
+    title: "Cloud Ops Command Center",
+    demandSignals: ["SRE", "Cloud FinOps", "IaC"],
+    summary:
+      "A simulated production control room showcasing blue/green rollouts, error-budget tracking, and live cost governance.",
+    highlights: [
+      "Canary + feature flag board visualizes rollout health with synthetic Grafana traces.",
+      "Terraform plan diff gallery illustrates policy-as-code guardrails and drift remediation.",
+      "Runbook snippets cover pager rotations, RCAs, and postmortem templates.",
+    ],
+    artifacts: ["Canary dashboard", "Terraform plan diff", "RCA template"],
+    ctaLabel: "View Ops Console",
+    ctaLink: "#cloud-ops-lab",
+  },
+  {
+    id: "data-studio",
+    title: "Data Storytelling Studio",
+    demandSignals: ["Decision intelligence", "Product analytics", "SQL/Python"],
+    summary:
+      "Interactive cohort explorer turning raw warehouse tables into executive-friendly narratives and growth bets.",
+    highlights: [
+      "Lightweight React viz lets reviewers slice retention cohorts and export stakeholder-ready insights.",
+      "Notebook + dbt snippets reveal feature engineering, anomaly detection, and data contracts.",
+      "Decision memo template ties findings to roadmap, KPIs, and experiment backlog.",
+    ],
+    artifacts: ["Cohort explorer demo", "dbt + notebook bundle", "Decision memo"],
+    ctaLabel: "Explore Data Studio",
+    ctaLink: "#data-storytelling-lab",
+  },
+  {
+    id: "devsecops",
+    title: "DevSecOps Lab",
+    demandSignals: ["Secure SDLC", "SBOM", "Threat modeling"],
+    summary:
+      "Hands-on supply-chain hardening lab documenting SBOM generation, attack simulations, and automated patch playbooks.",
+    highlights: [
+      "GitHub Actions pipeline publishes CycloneDX SBOMs and blocks risky dependencies.",
+      "Interactive threat-model canvas pairs misuse cases with compensating controls.",
+      "Incident simulator walks through CVE ingestion → triage → fix verification.",
+    ],
+    artifacts: ["SBOM packet", "Threat model", "Incident sim video"],
+    ctaLabel: "Open DevSecOps Lab",
+    ctaLink: "#devsecops-lab",
+  },
+  {
+    id: "inclusive-a11y",
+    title: "Inclusive Design Playground",
+    demandSignals: ["Accessibility", "Inclusive design", "QA leadership"],
+    summary:
+      "Accessibility audits, user persona research, and WCAG regression tooling packaged as a living QA lab.",
+    highlights: [
+      "Personas tie qualitative feedback to concrete UI changes and toggles.",
+      "WCAG scorecard + regression scripts quantify improvements.",
+      "Downloadable QA report shows stakeholder-ready documentation.",
+    ],
+    artifacts: ["QA report", "Persona board", "Regression suite"],
+    ctaLabel: "Review A11y Lab",
+    ctaLink: "#inclusive-design-lab",
+  },
+  {
+    id: "enablement",
+    title: "Enablement Hub",
+    demandSignals: ["Technical leadership", "Education", "Product enablement"],
+    summary:
+      "Workshop kits, facilitation scripts, and impact metrics that prove your ability to upskill teams fast.",
+    highlights: [
+      "Catalog of AI, SRE, and accessibility labs with agendas and starter repos.",
+      "Ready-to-send comms templates + retro forms for repeatable execution.",
+      "Impact dashboard tracks attendees, confidence lift, and follow-up commits.",
+    ],
+    artifacts: ["Toolkit PDF", "Slides", "Survey templates"],
+    ctaLabel: "Open Enablement Hub",
+    ctaLink: "#enablement-lab",
+  },
+];
+
+export const ARTIFACT_LIBRARY = [
+  {
+    title: "Data Studio Decision Memo",
+    format: "Markdown report",
+    goal: "Summarize experiment outcomes, risks, and next bets for growth reviews.",
+    impact: "Gives stakeholders the narrative behind the Cohort Explorer demo.",
+    linkLabel: "Download Memo",
+    link: "/artifacts/data-storytelling-decision-memo.md",
+  },
+  {
+    title: "AI Experiment Log",
+    format: "Notion + Colab bundle",
+    goal: "Document hypothesis-driven GenAI experiments with metrics, costs, and failure notes.",
+    impact: "Shows analytical rigor and responsible AI practices for PM + SWE audiences.",
+    linkLabel: "Download Log",
+    link: "/artifacts/ai-experiment-log.md",
+  },
+  {
+    title: "Cloud Ops Runbook",
+    format: "Markdown playbook",
+    goal: "Document blue/green rollout guardrails, incident response, and cost governance.",
+    impact: "Shows reliability rigor plus FinOps awareness for SRE-heavy roles.",
+    linkLabel: "View Runbook",
+    link: "/artifacts/cloud-ops-runbook.md",
+  },
+  {
+    title: "DevSecOps SBOM Packet",
+    format: "CycloneDX report",
+    goal: "Provide supply-chain evidence, policy gates, and threat model snapshots for secure SDLC stories.",
+    impact: "Highlights ability to operationalize security within CI/CD.",
+    linkLabel: "Download SBOM Packet",
+    link: "/artifacts/devsecops-lab-sbom.md",
+  },
+  {
+    title: "Systems Runbook",
+    format: "Terraform + PagerDuty PDF",
+    goal: "Explain how cloud rollouts are governed, triaged, and communicated cross-functionally.",
+    impact: "Highlights reliability leadership and cross-team coordination.",
+    linkLabel: "View Runbook",
+    link: "https://github.com/zohaib-cheema",
+  },
+  {
+    title: "Inclusive QA Report",
+    format: "Accessibility audit + usability clips",
+    goal: "Showcase how accessibility debt is measured, prioritized, and fixed.",
+    impact: "Aligns with inclusive design & CSR requirements many companies now enforce.",
+    linkLabel: "Preview QA Report",
+    link: "/artifacts/inclusive-qa-report.md",
+  },
+  {
+    title: "Enablement Toolkit",
+    format: "Workshop decks + starter repos",
+    goal: "Provide ready-to-teach content for internal upskilling sessions.",
+    impact: "Demonstrates leadership, communication, and multiplier mindset.",
+    linkLabel: "Access Toolkit",
+    link: "/artifacts/enablement-toolkit.md",
+  },
+];

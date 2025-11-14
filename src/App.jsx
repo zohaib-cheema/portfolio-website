@@ -11,6 +11,15 @@ import TraitsConvergence from "./components/TraitsConvergence";
 import Chatbot from "./components/Chatbot";
 import Calendar from "./pages/Calendar";
 import Feedback from "./pages/Feedback";
+import SkillShowcases from "./components/SkillShowcases";
+import ArtifactLibrary from "./components/ArtifactLibrary";
+import DataStorytellingLab from "./components/DataStorytellingLab";
+import AISandboxLab from "./components/AISandboxLab";
+import CloudOpsLab from "./components/CloudOpsLab";
+import DevSecOpsLab from "./components/DevSecOpsLab";
+import InclusiveDesignLab from "./components/InclusiveDesignLab";
+import EnablementLab from "./components/EnablementLab";
+import ScrollProgress from "./components/ScrollProgress";
 
 const HomePage = () => {
   return (
@@ -20,7 +29,15 @@ const HomePage = () => {
       <TraitsConvergence />
       <Experience />
       <Leadership />
+      <EnablementLab />
+      <SkillShowcases />
+      <AISandboxLab />
+      <CloudOpsLab />
+      <DevSecOpsLab />
+      <InclusiveDesignLab />
+      <DataStorytellingLab />
       <TechStack />
+      <ArtifactLibrary />
       <Projects />
       <Contact />
     </>
@@ -33,6 +50,7 @@ const App = () => {
 
   return (
     <div className="overflow-x-hidden text-neutral-300 antialiased selection:bg-cyan-300 selection:text-cyan-900">
+      <ScrollProgress />
       <div className="fixed top-0 -z-10 h-full w-full">
         <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
       </div>
