@@ -103,6 +103,9 @@ const currencyFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
+const formatPercent = (value) => percentFormatter.format(value);
+const formatDollars = (value) => currencyFormatter.format(value);
+
 const fadeIn = (delay = 0) => ({
   hidden: { opacity: 0, y: 25 },
   visible: {
@@ -140,9 +143,24 @@ const DataStorytellingLab = () => {
   }, [experimentId, scenarioMetrics, controlMetrics]);
 
   const chartBars = [
-    { label: "Activation", base: controlMetrics.activation, variant: scenarioMetrics.activation, formatter: percentFormatter },
-    { label: "Week 4 Retention", base: controlMetrics.retention, variant: scenarioMetrics.retention, formatter: percentFormatter },
-    { label: "Expansion Revenue", base: controlMetrics.expansion / 1000, variant: scenarioMetrics.expansion / 1000, formatter: (value) => `$${value}K` },
+    {
+      label: "Activation",
+      base: controlMetrics.activation,
+      variant: scenarioMetrics.activation,
+      formatter: formatPercent,
+    },
+    {
+      label: "Week 4 Retention",
+      base: controlMetrics.retention,
+      variant: scenarioMetrics.retention,
+      formatter: formatPercent,
+    },
+    {
+      label: "Expansion Revenue",
+      base: controlMetrics.expansion / 1000,
+      variant: scenarioMetrics.expansion / 1000,
+      formatter: (value) => `$${value}K`,
+    },
   ];
 
   return (
@@ -226,9 +244,7 @@ const DataStorytellingLab = () => {
             {metricCards.map((card) => {
               const value = scenarioMetrics[card.key];
               const formattedValue =
-                card.key === "expansion"
-                  ? currencyFormatter.format(value)
-                  : percentFormatter.format(value);
+                card.key === "expansion" ? formatDollars(value) : formatPercent(value);
               const deltaValue = deltas[card.key] ?? 0;
               const showDelta = experimentId !== "control" && card.key !== "ticketsPerK";
 
@@ -248,9 +264,7 @@ const DataStorytellingLab = () => {
                       }`}
                     >
                       {deltaValue >= 0 ? "+" : ""}
-                      {card.key === "expansion"
-                        ? currencyFormatter.format(deltaValue)
-                        : percentFormatter.format(deltaValue)}
+                      {card.key === "expansion" ? formatDollars(deltaValue) : formatPercent(deltaValue)}
                     </p>
                   )}
                   <p className="mt-1 text-xs text-neutral-400">{card.tooltip}</p>
