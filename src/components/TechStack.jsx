@@ -1,20 +1,68 @@
 import { motion } from "framer-motion";
 
-const marqueeTechs = [
-  { name: "React", icon: "react" },
-  { name: "Next.js", icon: "nextjs" },
-  { name: "TypeScript", icon: "ts" },
-  { name: "Node.js", icon: "nodejs" },
-  { name: "PostgreSQL", icon: "postgres" },
-  { name: "AWS", icon: "aws" },
-  { name: "Docker", icon: "docker" },
-  { name: "TensorFlow", icon: "tensorflow" },
-  { name: "Figma", icon: "figma" },
-  { name: "Kafka", icon: "kafka" },
-  { name: "Go", icon: "go" },
-  { name: "Python", icon: "python" },
-  { name: "MySQL", icon: "mysql" },
-  { name: "GitHub Actions", icon: "githubactions" },
+const techNameMap = {
+  js: "JavaScript",
+  ts: "TypeScript",
+  vue: "Vue.js",
+  angular: "Angular",
+  react: "React",
+  nextjs: "Next.js",
+  flutter: "Flutter",
+  html: "HTML",
+  css: "CSS",
+  sass: "Sass",
+  tailwind: "Tailwind CSS",
+  nodejs: "Node.js",
+  express: "Express",
+  mongodb: "MongoDB",
+  firebase: "Firebase",
+  flask: "Flask",
+  kafka: "Kafka",
+  jest: "Jest",
+  postman: "Postman",
+  git: "Git",
+  figma: "Figma",
+  idea: "IntelliJ IDEA",
+  vscode: "VS Code",
+  postgres: "PostgreSQL",
+  mysql: "MySQL",
+  aws: "AWS",
+  gcp: "Google Cloud",
+  azure: "Azure",
+  docker: "Docker",
+  supabase: "Supabase",
+  vercel: "Vercel",
+  netlify: "Netlify",
+  cypress: "Cypress",
+  githubactions: "GitHub Actions",
+  bash: "Bash",
+  linux: "Linux",
+  gradle: "Gradle",
+  vim: "Vim",
+  emacs: "Emacs",
+  python: "Python",
+  go: "Go",
+  java: "Java",
+  c: "C",
+};
+
+const techCategories = [
+  {
+    title: "Product Foundations",
+    technologies: ["react", "nextjs", "ts", "js", "sass", "tailwind", "figma"],
+  },
+  {
+    title: "Systems & Backend",
+    technologies: ["nodejs", "express", "python", "go", "kafka", "aws", "gcp", "docker"],
+  },
+  {
+    title: "Data & AI",
+    technologies: ["postgres", "mysql", "mongodb", "firebase", "tensorflow", "kafka"],
+  },
+  {
+    title: "Developer Experience",
+    technologies: ["jest", "cypress", "githubactions", "bash", "linux", "gradle", "vscode"],
+  },
 ];
 
 const fadeIn = (delay = 0) => ({
@@ -49,38 +97,55 @@ const TechStack = () => {
         viewport={{ once: true }}
         className="mx-auto max-w-3xl text-center text-neutral-300 text-base sm:text-lg"
       >
-        A looping snapshot of the tools I touch every week—from product design to
-        distributed systems. Hover to pause, tap to explore.
+        Each lane loops through the tools I use most for that layer of the stack—hover
+        to pause, click to preview icons.
       </motion.p>
 
-      <motion.div
-        variants={fadeIn(0.1)}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="relative mt-12 overflow-hidden rounded-2xl border border-neutral-800/60 bg-neutral-900/40 py-6"
-      >
-        <div className="logo-loop-fade-left" />
-        <div className="logo-loop-fade-right" />
-        <div className="logo-loop-track hover:[animation-play-state:paused]">
-          {[...Array(2)].map((_, loopIndex) =>
-            marqueeTechs.map((tech) => (
-              <div
-                key={`${tech.name}-${loopIndex}`}
-                className="flex w-40 flex-col items-center justify-center gap-2 px-4"
-              >
-                <img
-                  src={`https://skillicons.dev/icons?i=${tech.icon}&theme=dark`}
-                  alt={tech.name}
-                  className="h-10 w-10 object-contain"
-                  loading="lazy"
-                />
-                <span className="text-sm font-medium text-neutral-200">{tech.name}</span>
+      <div className="mt-12 space-y-10">
+        {techCategories.map((category, index) => (
+          <motion.div
+            key={category.title}
+            variants={fadeIn(0.1 + index * 0.1)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="rounded-2xl border border-neutral-800/60 bg-neutral-900/40 p-6"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h3 className="text-2xl font-semibold text-purple-300">
+                {category.title}
+              </h3>
+              <p className="text-sm text-neutral-400">
+                {category.technologies.length} core tools
+              </p>
+            </div>
+            <div className="relative overflow-hidden py-4">
+              <div className="logo-loop-fade-left" />
+              <div className="logo-loop-fade-right" />
+              <div className="logo-loop-track hover:[animation-play-state:paused]">
+                {[...Array(2)].map((_, loopIndex) =>
+                  category.technologies.map((tech) => (
+                    <div
+                      key={`${category.title}-${tech}-${loopIndex}`}
+                      className="flex w-36 flex-col items-center justify-center gap-2 px-4"
+                    >
+                      <img
+                        src={`https://skillicons.dev/icons?i=${tech}&theme=dark`}
+                        alt={techNameMap[tech] || tech}
+                        className="h-10 w-10 object-contain"
+                        loading="lazy"
+                      />
+                      <span className="text-xs font-medium text-neutral-200">
+                        {techNameMap[tech] || tech}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
-            ))
-          )}
-        </div>
-      </motion.div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
     </section>
   );
 };
