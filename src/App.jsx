@@ -13,9 +13,7 @@ import Calendar from "./pages/Calendar";
 import Feedback from "./pages/Feedback";
 import ScrollProgress from "./components/ScrollProgress";
 import SkillLabsPreview from "./components/SkillLabsPreview";
-import ArtifactPreview from "./components/ArtifactPreview";
 import LabsPage from "./pages/Labs";
-import ArtifactsPage from "./pages/Artifacts";
 
 const HomePage = () => {
   return (
@@ -27,7 +25,6 @@ const HomePage = () => {
       <Leadership />
       <SkillLabsPreview />
       <TechStack />
-      <ArtifactPreview />
       <Projects />
       <Contact />
     </>
@@ -59,14 +56,6 @@ const App = () => {
           element={
             <div className="container mx-auto px-8">
               <LabsPage />
-            </div>
-          }
-        />
-        <Route
-          path="/artifacts"
-          element={
-            <div className="container mx-auto px-8">
-              <ArtifactsPage />
             </div>
           }
         />

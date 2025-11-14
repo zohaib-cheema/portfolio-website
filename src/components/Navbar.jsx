@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
+import { Link } from "react-router-dom";
 import logo from "../assets/kevinRushLogo.png";
 
 const Navbar = () => {
@@ -76,9 +77,9 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="logo" className="w-10 h-10 object-contain" />
-        </div>
+        </Link>
 
         {/* Desktop Nav Links */}
         <ul className="hidden sm:flex gap-8 text-white font-medium text-[16px]">
@@ -92,7 +93,7 @@ const Navbar = () => {
               }`}
               onClick={() => handleLinkClick(link.id)}
             >
-              <a href={`#${link.id}`}>{link.title}</a>
+              <a href={`/#${link.id}`}>{link.title}</a>
             </li>
           ))}
         </ul>
@@ -108,7 +109,7 @@ const Navbar = () => {
             {navLinks.map((link) => (
               <a
                 key={link.id}
-                href={`#${link.id}`}
+                href={`/#${link.id}`}
                 onClick={() => handleLinkClick(link.id)}
                 className="hover:text-pink-400 transition-all"
               >
