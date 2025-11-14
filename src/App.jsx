@@ -11,15 +11,11 @@ import TraitsConvergence from "./components/TraitsConvergence";
 import Chatbot from "./components/Chatbot";
 import Calendar from "./pages/Calendar";
 import Feedback from "./pages/Feedback";
-import SkillShowcases from "./components/SkillShowcases";
-import ArtifactLibrary from "./components/ArtifactLibrary";
-import DataStorytellingLab from "./components/DataStorytellingLab";
-import AISandboxLab from "./components/AISandboxLab";
-import CloudOpsLab from "./components/CloudOpsLab";
-import DevSecOpsLab from "./components/DevSecOpsLab";
-import InclusiveDesignLab from "./components/InclusiveDesignLab";
-import EnablementLab from "./components/EnablementLab";
 import ScrollProgress from "./components/ScrollProgress";
+import SkillLabsPreview from "./components/SkillLabsPreview";
+import ArtifactPreview from "./components/ArtifactPreview";
+import LabsPage from "./pages/Labs";
+import ArtifactsPage from "./pages/Artifacts";
 
 const HomePage = () => {
   return (
@@ -29,15 +25,9 @@ const HomePage = () => {
       <TraitsConvergence />
       <Experience />
       <Leadership />
-      <EnablementLab />
-      <SkillShowcases />
-      <AISandboxLab />
-      <CloudOpsLab />
-      <DevSecOpsLab />
-      <InclusiveDesignLab />
-      <DataStorytellingLab />
+      <SkillLabsPreview />
       <TechStack />
-      <ArtifactLibrary />
+      <ArtifactPreview />
       <Projects />
       <Contact />
     </>
@@ -61,6 +51,22 @@ const App = () => {
           element={
             <div className="container mx-auto px-8">
               <HomePage />
+            </div>
+          }
+        />
+        <Route
+          path="/labs"
+          element={
+            <div className="container mx-auto px-8">
+              <LabsPage />
+            </div>
+          }
+        />
+        <Route
+          path="/artifacts"
+          element={
+            <div className="container mx-auto px-8">
+              <ArtifactsPage />
             </div>
           }
         />
