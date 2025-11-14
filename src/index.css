@@ -7,3 +7,39 @@
 :root {
   font-family: "Inter", sans-serif;
 }
+
+.logo-loop-track {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: logo-loop 32s linear infinite;
+}
+
+.logo-loop-fade-left,
+.logo-loop-fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.logo-loop-fade-left {
+  left: 0;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0));
+}
+
+.logo-loop-fade-right {
+  right: 0;
+  background: linear-gradient(-90deg, rgba(15, 23, 42, 1), rgba(15, 23, 42, 0));
+}
+
+@keyframes logo-loop {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

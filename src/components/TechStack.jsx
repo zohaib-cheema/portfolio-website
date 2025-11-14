@@ -81,6 +81,19 @@ const fadeIn = (delay = 0) => ({
   },
 });
 
+const marqueeTechs = [
+  { name: "React", icon: "react" },
+  { name: "Next.js", icon: "nextjs" },
+  { name: "TypeScript", icon: "ts" },
+  { name: "Node.js", icon: "nodejs" },
+  { name: "PostgreSQL", icon: "postgres" },
+  { name: "AWS", icon: "aws" },
+  { name: "Docker", icon: "docker" },
+  { name: "TensorFlow", icon: "tensorflow" },
+  { name: "Figma", icon: "figma" },
+  { name: "Kafka", icon: "kafka" },
+];
+
 const TechStack = () => {
   const [expandedCategories, setExpandedCategories] = useState({});
   const MAX_VISIBLE_TECHS = 5;
@@ -107,6 +120,36 @@ const TechStack = () => {
       >
         Tech Stack
       </motion.h2>
+
+      {/* Logo loop */}
+      <motion.div
+        variants={fadeIn(0.05)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="relative mt-10 overflow-hidden rounded-2xl border border-neutral-800/60 bg-neutral-900/40 py-6"
+      >
+        <div className="logo-loop-fade-left" />
+        <div className="logo-loop-fade-right" />
+        <div className="logo-loop-track">
+          {[...Array(2)].map((_, loopIndex) =>
+            marqueeTechs.map((tech) => (
+              <div
+                key={`${tech.name}-${loopIndex}`}
+                className="flex w-40 flex-col items-center justify-center gap-2 px-4"
+              >
+                <img
+                  src={`https://skillicons.dev/icons?i=${tech.icon}&theme=dark`}
+                  alt={tech.name}
+                  className="h-10 w-10 object-contain"
+                  loading="lazy"
+                />
+                <span className="text-sm font-medium text-neutral-200">{tech.name}</span>
+              </div>
+            ))
+          )}
+        </div>
+      </motion.div>
 
       {/* Categories */}
       <div className="space-y-6 mt-16 max-w-6xl mx-auto">
