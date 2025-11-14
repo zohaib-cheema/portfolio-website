@@ -82,7 +82,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2" onClick={handleLogoClick}>
+        <Link to="/" className="logo-link flex items-center gap-2" onClick={handleLogoClick}>
           <img src={logo} alt="logo" className="w-10 h-10 object-contain" />
         </Link>
 

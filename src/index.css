@@ -8,6 +8,14 @@
   font-family: "Inter", sans-serif;
 }
 
+.logo-link img {
+  transition: filter 200ms ease;
+}
+
+.logo-link:hover img {
+  filter: hue-rotate(300deg) saturate(150%);
+}
+
 .logo-loop-track {
   display: flex;
   gap: 1.5rem;
