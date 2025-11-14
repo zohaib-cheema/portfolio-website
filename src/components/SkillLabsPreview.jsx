@@ -32,10 +32,6 @@ const SkillLabsPreview = () => {
         <h2 className="mt-4 text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
           Market-Proof Demonstrations
         </h2>
-        <p className="mt-4 text-neutral-300 text-base sm:text-lg">
-          Snapshot of the hands-on labs that recruiters keep asking about—deep dives
-          live on the Labs hub.
-        </p>
       </motion.div>
 
       <div className="mt-12 grid gap-8 md:grid-cols-3">

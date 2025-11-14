@@ -94,17 +94,6 @@ const TechStack = () => {
         Tech Stack
       </motion.h2>
 
-      <motion.p
-        variants={fadeIn(0.05)}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        className="mx-auto max-w-3xl text-center text-neutral-300 text-base sm:text-lg"
-      >
-        Each lane loops through the tools I use most for that layer of the stack—hover
-        to pause, click to preview icons.
-      </motion.p>
-
       <div className="mt-12 space-y-10">
         {techCategories.map((category, index) => (
           <motion.div
