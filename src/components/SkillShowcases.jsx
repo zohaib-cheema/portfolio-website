@@ -29,12 +29,6 @@ const SkillShowcases = () => {
         <h2 className="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-pink-300 via-slate-500 to-purple-500 bg-clip-text text-transparent">
           Skill Labs
         </h2>
-        <p className="mt-6 text-neutral-300 text-base sm:text-lg leading-relaxed">
-          Each lab is a living, shippable artifact designed around the top skills
-          recruiters ask about in 2025—from GenAI orchestration to secure SDLC.
-          Peek behind the curtain to see architecture notes, KPIs, and the exact
-          assets you can share in interviews.
-        </p>
       </motion.div>
 
       <div className="mt-16 grid gap-10 lg:grid-cols-2">
