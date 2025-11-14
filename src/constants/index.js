@@ -23,7 +23,7 @@ export const EXPERIENCES = [
     role: "Software Engineer Intern",
     company: "iD Tech",
     logo: idtechLogo,
-    description: `Taught 70+ students DSA in Python and AI chatbot development, and led workshops on building multi-agent GPT-3.5/Microsoft AutoGen chatbots to generate and debug Gurobi code for supply chain optimization.`,
+    description: `Taught 70+ students DSA in Python, MERN stack development, and led workshops on building multi-agent GPT-3.5/Microsoft AutoGen chatbots to generate and debug Gurobi code for supply chain optimization.`,
     technologies: ["Python", "AI", "GPT-3.5", "Microsoft AutoGen", "Gurobi"],
   },
   {
