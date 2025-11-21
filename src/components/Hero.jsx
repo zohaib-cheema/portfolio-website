@@ -57,7 +57,6 @@ const Hero = () => {
         "a GDSC Lead",
         "a SWE Instructor at iD Tech",
         "a CS Major",
-        "a Data Science Club Co-President",
         "a Bucknell Consultant",
         "a Full-Stack SWE Intern",
         "an App Dev Intern",

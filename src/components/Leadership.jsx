@@ -17,14 +17,6 @@ const LEADERSHIP = [
     description:
       "Directed 3 tech-consulting projects with student teams, delivering innovative, data-driven solutions for local businesses. Conducted over 10 workshops in collaboration with industry experts to strengthen member capabilities in IT strategy, analytics, and client communications.",
   },
-  {
-    org: "Bucknell Data Science Club",
-    role: "Co-President",
-    location: "Lewisburg, PA",
-    duration: "Oct 2022 – Aug 2023",
-    description:
-      "Led 3 university hackathons and facilitated 8+ sessions focusing on real-world applications of Python, TensorFlow, and Tableau. Encouraged student engagement and data storytelling using tools like Jupyter and Matplotlib.",
-  },
 ];
 
 const Leadership = () => {
